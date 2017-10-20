@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_weight="0.1">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/sideBarContentLL"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/imgBtnPopupMenuMain"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:background="#00ffffff"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="#95A5A6"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"/>
+
+                <FrameLayout
+                    android:id="@+id/serverCountWrapper"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorBackgroundSidebar"
+                    >
+            <TextView
+                android:id="@+id/tvServerCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="0 Servers"
+                android:layout_gravity="center"
+                />
+                </FrameLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="#95A5A6"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="0dp"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnResearchServers"
+                android:maxLines="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Retry"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+           <FrameLayout
+               android:layout_width="fill_parent"
+               android:layout_height="fill_parent">
+
+               <RelativeLayout
+                   android:id="@+id/llPullToRefresh"
+                   android:layout_width="fill_parent"
+                   android:layout_height="fill_parent"
+                   android:layout_marginBottom="30dp"
+                   android:visibility="gone">
+
+                   <LinearLayout
+                       android:layout_width="fill_parent"
+                       android:layout_height="wrap_content"
+                       android:orientation="vertical"
+                       android:layout_centerInParent="true">
+                       <TextView
+                           android:id="@+id/tvPullToRefresh"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:layout_gravity="center"
+                           android:layout_marginTop="10dp"
+                           android:maxLines="1"
+                           android:text="pull to refresh"/>
+
+                       <ImageView
+                           android:id="@+id/imgPullDown"
+                           android:layout_width="70dp"
+                           android:layout_height="70dp"
+                           android:layout_gravity="center"
+                           android:layout_marginTop="-15dp"
+                           />
+                   </LinearLayout>
+               </RelativeLayout>
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipeContainer"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                >
+                <org.lucasr.twowayview.TwoWayView
+                    android:id="@+id/listViewServers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:longClickable="true"/>
+
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+           </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llExpandSidebar"
+            android:layout_width="@dimen/open_sidebar_btn_width"
+            android:layout_height="fill_parent"
+            android:background="@color/colorExpandSidebarButton">
+            <FrameLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+            <ImageButton
+                android:id="@+id/btnExpand"
+                android:background="#00ffffff"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                />
+                <ImageView
+                    android:id="@+id/expandImg"
+                    android:layout_gravity="center"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/expand_right_icon"
+                    />
+            </FrameLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    <org.lucasr.twowayview.TwoWayView
+
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/lvItems"
+        style="@style/TwoWayView"
+        android:layout_gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:drawSelectorOnTop="false"
+        tools:context=".MainActivity"
+        android:paddingLeft="5dp"
+        android:paddingRight="0dp"
+        android:background="@color/colorBackgroundSecondary"
+        />
+        <LinearLayout
+            android:id="@+id/llConnectionTip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="100px"
+                android:layout_height="100px"
+                android:src="@mipmap/monitor_icon"
+                android:layout_gravity="center"/>
+            <TextView
+                android:textSize="20sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="No computers found"
+                android:layout_marginBottom="10dp"/>
+            <TextView
+                android:textSize="13sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/empty_list_view_download_prompt"/>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/download_server_url"/>
+        </LinearLayout>
+    </FrameLayout>
+
+
+</LinearLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/mniRefreshServers"
+        android:orderInCategory="1"
+        app:showAsAction="never"
+        android:title="@string/main_menu_refresh"/>
+
+    <item
+        android:id="@+id/mniHowToUse"
+        android:orderInCategory="2"
+        app:showAsAction="never"
+        android:title="@string/main_menu_how_to_use"/>
+    <!--<item-->
+        <!--android:id="@+id/mniFeedback"-->
+        <!--android:orderInCategory="3"-->
+        <!--app:showAsAction="never"-->
+        <!--android:title="@string/main_menu_feedback"/>-->
+    <item
+        android:id="@+id/mniShowSettings"
+        android:orderInCategory="4"
+        app:showAsAction="never"
+        android:title="@string/main_menu_settings"/>
+</menu>

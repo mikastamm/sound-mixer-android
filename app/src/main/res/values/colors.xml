@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--DayModeColors-->
+    <color name="colorBackgroundSecondary">#EEEEEE</color>
+    <color name="colorBackground">#ffffff</color>
+    <color name="colorText">#505050</color>
+    <color name="colorPrimary">#3498DB</color>
+    <color name="colorPrimaryDark">#3498DB</color>
+    <color name="colorAccent">#3498DB</color>
+    <color name="colorExpandSidebarButton">#E0E0E0</color>
+    <color name="colorBackgroundSidebar">#FAFAFA</color>
+
+    <!--NightModeColors-->
+    <color name="colorTextNight">#fefefe</color>
+    <color name="colorBackgroundNightLight">#303030</color>
+    <color name="colorBackgroundNight">#1C1C1C</color>
+    <color name="colorBackgroundSecondaryNight">#272727</color>
+    <color name="colorExpandSidebarButtonNight">#1C1C1C</color>
+</resources>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llServerInfoWrapper"
+    android:orientation="horizontal" android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/llServerShadowWrapper"
+        android:layout_width="120dp"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal"
+        android:padding="7dp">
+
+        <ImageView
+            android:id="@+id/lockIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@mipmap/lock_icon"
+            android:layout_gravity="left|center_vertical"
+            />
+
+        <LinearLayout
+            android:id="@+id/llServerInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_marginLeft="-20dp">
+
+            <ImageView
+                android:id="@+id/serverIcon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/server_icon"
+                android:layout_gravity="center"
+                />
+
+            <TextView
+                android:id="@+id/tvServerName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="asdasd"
+                android:maxLines="1"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit ="marquee_forever"/>
+
+            <TextView
+                android:id="@+id/tvServerIP"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#95A5A6"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:text="0.0.0.0"/>
+
+        </LinearLayout>
+    </LinearLayout>
+        <View
+            android:layout_width="2px"
+            android:layout_height="fill_parent"
+            android:background="#95A5A6"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"/>
+    </LinearLayout>
+</LinearLayout>

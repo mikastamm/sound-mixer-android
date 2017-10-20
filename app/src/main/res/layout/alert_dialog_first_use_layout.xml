@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp">
+
+    <TextView
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        android:text="@string/first_use_dialog_main_text"/>
+   <FrameLayout
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="15dp"
+       android:layout_marginStart="10dp"
+       android:layout_marginLeft="10dp">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="15sp"
+        android:text="@string/download_server_at"/>
+   </FrameLayout>
+    <FrameLayout
+        android:id="@+id/frlDownloadServerLink"
+        android:layout_marginTop="2dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_download_url_wrapper"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="5dp">
+        <TextView
+            android:textStyle="bold"
+            android:layout_margin="7dp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:text="@string/download_server_url"/>
+    </FrameLayout>
+
+
+    <!--<LinearLayout-->
+        <!--android:layout_marginLeft="10dp"-->
+        <!--android:layout_marginRight="10dp"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:weightSum="100">-->
+        <!--<TextView-->
+            <!--android:layout_weight="10"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="start|center"-->
+            <!--android:text="Don't show again"/>-->
+        <!--<CheckBox-->
+            <!--android:id="@+id/cbInstructionsDialogShowAgain"-->
+            <!--android:layout_weight="90"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="end|center_vertical"-->
+            <!--android:checked="true"/>-->
+    <!--</LinearLayout>-->
+</LinearLayout>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_weight="0.5"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:clipToPadding="false"
+>
+
+    <FrameLayout
+        android:id="@+id/frlShadowContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:background="@color/colorBackground"
+        android:elevation="3dp">
+    <LinearLayout
+        android:layout_width="100dp"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        >
+
+    <View
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:id="@+id/RowPadding"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Firefox"
+        android:id="@+id/txtApplicationName"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_weight="0"
+        />
+
+        <com.nulldozer.volumecontrol.SquareImageButton
+            android:id="@+id/iconBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="#00ffffff"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+            <!--<LinearLayout-->
+                <!--android:id="@+id/llTicksLeft"-->
+                <!--android:layout_width="10dp"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:orientation="vertical">-->
+            <!--</LinearLayout>-->
+            <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+
+                >
+                <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+                    android:id="@+id/vsbSeekBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:thumb="@mipmap/seekbar_thumb"
+                    android:progressDrawable="@drawable/seekbar_progressbar"
+                    android:thumbOffset="10dp"
+                    android:progress="65"
+                    app:seekBarRotation="CW270"
+                    android:splitTrack="false"
+                    android:maxHeight="15dp"
+                    android:max="100"
+                    android:layout_marginBottom="10dp"
+                    /> <!-- Rotation: CW90 or CW270 -->
+            </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
+        </LinearLayout>
+
+    </LinearLayout>
+    </FrameLayout>
+    <View
+        android:id="@+id/volumeListViewDivider"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="#95A5A6"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"/>
+</LinearLayout>

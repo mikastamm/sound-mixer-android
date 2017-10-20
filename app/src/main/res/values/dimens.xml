@@ -1,0 +1,10 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="edit_text_margin">20dp</dimen>
+    <dimen name="open_sidebar_btn_width">35dp</dimen>
+    <dimen name="tick_height">1dp</dimen>
+    <dimen name="tick_short_width">5dp</dimen>
+    <dimen name="tick_long_width">10dp</dimen>
+</resources>
