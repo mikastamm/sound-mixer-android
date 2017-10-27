@@ -55,11 +55,9 @@ public class NetworkDiscoveryThread implements Runnable {
 
     public NetworkDiscoveryThread() {
         main = MainActivity.Instance;
-        serverCountTextView = ((TextView)main.findViewById(R.id.tvServerCount));
+
         activeVolumeServerRSAKey = main.serverListViewAdapter.getActive();
     }
-
-    TextView serverCountTextView;
 
     @Override
     public void run() {
@@ -67,18 +65,7 @@ public class NetworkDiscoveryThread implements Runnable {
             @Override
             public void run() {
                 main.serverListViewAdapter.listElements.clear();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(100);
-                            serverCountTextView.setText(main.serverListViewAdapter.getCount() + (main.serverListViewAdapter.getCount() == 1 ? " Server" : " Servers"));
-                        }catch (InterruptedException ie)
-                        {
-
-                        }
-                    }
-                });
+                main.onNetworkDiscoveryStarted();
                 main.serverListViewAdapter.notifyDataSetChanged();
             }
         });
@@ -229,26 +216,7 @@ public class NetworkDiscoveryThread implements Runnable {
                     main.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.i(TAG, "Found Server:" + server.toString());
-
-
-                            if(main.serverListViewAdapter.activeServer != null && main.serverListViewAdapter.activeServer.RSAPublicKey.equals(server.RSAPublicKey))
-                            {
-                                main.serverListViewAdapter.listElements.add(main.serverListViewAdapter.activeServer);
-                            }
-                            else{
-                                main.serverListViewAdapter.listElements.add(server);
-                            }
-
-                            main.serverListViewAdapter.notifyDataSetChanged();
-                            serverCountTextView.setText(main.serverListViewAdapter.getCount() + (main.serverListViewAdapter.getCount() == 1 ? " Server" : " Servers"));
-
-                            main.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    main.Instance.refreshServersTip.setVisibility(View.GONE);
-                                }
-                            });
+                            MainActivity.Instance.onServerDiscovered(server);
                         }
                     });
 

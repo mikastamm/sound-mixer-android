@@ -7,8 +7,6 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -60,6 +58,8 @@ public class ClientThread{
             socket.close();
             inFromServer.close();
             outstream.close();
+            MainActivity.Instance.serverListViewAdapter.activeServer = null;
+            activeServer.active = false;
         }
         catch (Exception ex)
         {
@@ -96,6 +96,14 @@ public class ClientThread{
         public void run() {
             try {
                 Log.i(TAG, "Active Server IP: " + activeServer.IPAddress);
+
+                MainActivity.Instance.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.Instance.onConnect(activeServer);
+                    }
+                });
+
                 socket = new Socket(InetAddress.getByName(activeServer.IPAddress), MainActivity.SERVER_CONNECTION_TCP_PORT);
                 inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 outstream = socket.getOutputStream();
@@ -110,14 +118,6 @@ public class ClientThread{
 
                 outWriter.println("DEVINFO" + JSONManager.serialize(thisDevice));
                 outWriter.flush();
-
-                MainActivity.Instance.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
-                        llConnectionTip.setVisibility(View.GONE);
-                    }
-                });
 
                 listenerThread = new Thread(receiveAudioData);
                 listenerThread.start();
@@ -244,38 +244,14 @@ public class ClientThread{
                                 SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
                                 editor.putString(MainActivity.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
                                 editor.apply();
+
+                                String vDataJson = msg.substring(3);
+                                final VolumeData[] recv = JSONManager.deserialize(vDataJson, VolumeData[].class);
+
                                 MainActivity.Instance.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (!MainActivity.Instance.fragmentRetained)
-                                        Toast.makeText(MainActivity.Instance, "Connected to " + activeServer.name, Toast.LENGTH_SHORT).show();
-                                        String vDataJson = msg.substring(3);
-                                        VolumeData[] recv = JSONManager.deserialize(vDataJson, VolumeData[].class);
-
-                                        MainActivity.Instance.adapter.clear();
-                                        MainActivity.Instance.adapter.addAll(recv);
-
-
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
-                                        for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
-                                            VolumeData vm = MainActivity.Instance.adapter.listElements.get(i);
-                                            if (vm.title.equals("Master")) //TODO: Use multilanguage title
-                                            {
-                                                if (i != 0) {
-                                                    VolumeData pos0 = MainActivity.Instance.adapter.listElements.get(0);
-                                                    MainActivity.Instance.adapter.listElements.set(0, vm);
-                                                    MainActivity.Instance.adapter.listElements.set(i, pos0);
-                                                }
-                                            } else if (vm.title.equals("System"))//TODO: Use multilanguage title
-                                            {
-                                                if (i != 1) {
-                                                    VolumeData pos1 = MainActivity.Instance.adapter.listElements.get(1);
-                                                    MainActivity.Instance.adapter.listElements.set(1, vm);
-                                                    MainActivity.Instance.adapter.listElements.set(i, pos1);
-                                                }
-                                            }
-                                        }
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                        MainActivity.Instance.onAudioSessionListReceived(activeServer, recv);
                                     }
                                 });
 
@@ -340,7 +316,8 @@ public class ClientThread{
                                         MainActivity.Instance.adapter.notifyDataSetChanged();
                                     }
                                 });
-                            } else if (msg.startsWith("IMGS")) // All application icons
+                            }
+                            else if (msg.startsWith("IMGS")) // All application icons
                             {
                                 String imgDataJson = msg.substring(4);
                                 final ApplicationIcon[] icons = JSONManager.deserialize(imgDataJson, ApplicationIcon[].class);
@@ -348,12 +325,11 @@ public class ClientThread{
                                 MainActivity.Instance.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-
                                         for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
                                             for (int j = 0; j < icons.length; j++) {
                                                 if (MainActivity.Instance.adapter.listElements.get(i).id.equals(icons[j].id)) {
 
-                                                    byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP);
+                                                    byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP); //TODO: If more performance needed move this out of run on ui
                                                     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
 
                                                     if (bitmap == null) {
@@ -365,10 +341,33 @@ public class ClientThread{
 
                                                 }
                                             }
-
-
                                         }
+                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                    }
+                                });
 
+                            }
+                            else if (msg.startsWith("IMG")) // Single application Icon
+                            {
+                                String imgDataJson = msg.substring(3);
+                                final ApplicationIcon icon = JSONManager.deserialize(imgDataJson, ApplicationIcon.class);
+                                byte[] imgBytes = Base64.decode(icon.icon, Base64.NO_WRAP);
+                                final Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+
+                                Log.i("ClientThread", "Received Icon");
+                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
+                                            if (MainActivity.Instance.adapter.listElements.get(i).id.equals(icon.id)) {
+                                                if (bitmap == null) {
+                                                    MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
+                                                } else {
+                                                    MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, bitmap);
+                                                }
+                                            }
+                                        }
                                         MainActivity.Instance.adapter.notifyDataSetChanged();
                                     }
                                 });
@@ -399,14 +398,11 @@ public class ClientThread{
                         }
 
                     } catch (IOException ioe) {
-                        if(ioe.getMessage().contains("ECONNRESET")) //Server closed
-                        {
                             Log.i(TAG, "Connection to server lost");
+                            ioe.printStackTrace();
                             close();
                             new NetworkDiscoveryThread().start();
                             return;
-                        }
-                        ioe.printStackTrace();
                     }
                 }
                 close();

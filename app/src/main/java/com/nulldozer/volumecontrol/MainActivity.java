@@ -50,7 +50,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static int NETWORK_DISCOVERY_UDP_PORT = 11045;
+    public static int NETWORK_DISCOVERY_UDP_PORT = 11050;
     public static int NETWORK_DISCOVERY_TCP_PORT = NETWORK_DISCOVERY_UDP_PORT;
     public static int SERVER_CONNECTION_TCP_PORT = 11047;
 
@@ -134,6 +134,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void onNetworkDiscoveryStarted(){
+        TextView serverCountTextView = ((TextView)findViewById(R.id.tvServerCount));
+        serverCountTextView.setText("0 Servers");
+    }
+
     public void onNetworkDiscoveryFinished(){
 
         if (Build.VERSION.SDK_INT >= 19 && !useAlternativeServerRefresh)
@@ -152,6 +157,65 @@ public class MainActivity extends AppCompatActivity {
 
         if(serverListViewAdapter.activeServer == null && !sideBarExpanded)
             toggleSidebar();
+    }
+
+    public void onServerDiscovered(VolumeServer server){
+        Log.i(TAG, "Found Server:" + server.toString());
+
+        if(serverListViewAdapter.activeServer != null && serverListViewAdapter.activeServer.RSAPublicKey.equals(server.RSAPublicKey))
+        {
+            serverListViewAdapter.listElements.add(serverListViewAdapter.activeServer);
+        }
+        else{
+            serverListViewAdapter.listElements.add(server);
+        }
+        serverListViewAdapter.notifyDataSetChanged();
+
+        TextView serverCountTextView = ((TextView)findViewById(R.id.tvServerCount));
+        serverCountTextView.setText(serverListViewAdapter.getCount() + (serverListViewAdapter.getCount() == 1 ? " Server" : " Servers"));
+
+        refreshServersTip.setVisibility(View.GONE);
+    }
+
+    public void onConnect(VolumeServer target){
+        LinearLayout llConnectionTip = (LinearLayout)findViewById(R.id.llConnectionTip);
+        llConnectionTip.setVisibility(View.GONE);
+    }
+
+    public void onAudioSessionListReceived(VolumeServer target, VolumeData[] audioSessions)
+    {
+        if (!fragmentRetained)
+            Toast.makeText(this, "Connected to " + target.name, Toast.LENGTH_SHORT).show();
+
+        if(sideBarExpanded)
+        {
+            toggleSidebar();
+        }
+
+        //Fill the listView with the received data
+        adapter.clear();
+        adapter.addAll(audioSessions);
+
+        adapter.notifyDataSetChanged();
+        for (int i = 0; i < adapter.listElements.size(); i++) {
+            VolumeData vm = adapter.listElements.get(i);
+            if (vm.title.equals("Master")) //TODO: Use multilanguage title
+            {
+                if (i != 0) {
+                    VolumeData pos0 = adapter.listElements.get(0);
+                    adapter.listElements.set(0, vm);
+                    adapter.listElements.set(i, pos0);
+                }
+            } else if (vm.title.equals("System"))//TODO: Use multilanguage title
+            {
+                if (i != 1) {
+                    VolumeData pos1 = adapter.listElements.get(1);
+                    adapter.listElements.set(1, vm);
+                    adapter.listElements.set(i, pos1);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -711,7 +775,7 @@ public class MainActivity extends AppCompatActivity {
                 //   btnExpand.setImageResource(R.mipmap.expand_right_icon);
 
                 ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), 0);
-                Easing easing = new Easing(250);
+                Easing easing = new Easing(350);
                 rotate.setEvaluator(easing);
                 rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
@@ -720,7 +784,7 @@ public class MainActivity extends AppCompatActivity {
                         expandImg.setRotation(rotVal);
                     }
                 });
-                rotate.setDuration(250);
+                rotate.setDuration(350);
                 rotate.start();
 
                 ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredWidth(), 0);
@@ -735,7 +799,7 @@ public class MainActivity extends AppCompatActivity {
                         sideBarContentLL.setLayoutParams(layoutParams);
                     }
                 });
-                anim.setDuration(250);
+                anim.setDuration(350);
                 anim.start();
 
                 //  sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
