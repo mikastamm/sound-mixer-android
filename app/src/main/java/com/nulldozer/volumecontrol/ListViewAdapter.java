@@ -90,11 +90,11 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
             if(MainActivity.nightmode)
             {
                 txtApplicationName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
-                frlShadows.setBackgroundResource(R.color.colorBackgroundSecondaryNight);
+                frlShadows.setBackgroundResource(R.drawable.seekbar_card_background_night);
             }
             else{
                 txtApplicationName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
-                frlShadows.setBackgroundResource(R.color.colorBackground);
+                frlShadows.setBackgroundResource(R.drawable.seekbar_card_background);
             }
 
             if(MainActivity.hideApplicationIcons)

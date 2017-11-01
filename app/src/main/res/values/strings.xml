@@ -87,4 +87,18 @@
     <string name="download_server_at">To download and for install intructions visit</string>
     <string name="first_use_dialog_main_text">To properly use this app you have to install the Windows Application on the computer you want to remote control</string>
     <string name="empty_list_view_download_prompt">Download the Windows Application here:</string>
+    <string name="how_was_your_experience_with_us">How was your experience with us?</string>
+    <string name="submit">submit</string>
+
+
+    <!--feedback strings-->
+    <string name="feedback_hint_neutral_feedback">Tell us about your experience with us or what we could do better</string>
+    <string name="feedback_title_neutral_feedback">Please help us improve this app by giving feedback</string>
+
+    <string name="feedback_hint_bad_feedback">Tell us about your experience</string>
+    <string name="feedback_title_bad_feedback">Did something go wrong and how could we improve?</string>
+
+    <string name="send">send</string>
+    <string name="thanks_for_feedback">Thanks for your help improving this app</string>
+
 </resources>

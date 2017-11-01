@@ -16,7 +16,7 @@
         android:id="@+id/frlShadowContainer"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:background="@color/colorBackground"
+        android:background="@drawable/seekbar_card_background"
         android:elevation="3dp">
     <LinearLayout
         android:layout_width="100dp"

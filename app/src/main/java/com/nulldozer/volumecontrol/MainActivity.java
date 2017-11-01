@@ -12,7 +12,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -35,7 +34,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -273,33 +271,11 @@ public class MainActivity extends AppCompatActivity {
 
         if(prefs.getBoolean(FirstConnectHappened_PrefKey, false) && !fragmentRetained)
         {
-            int prompts = prefs.getInt(RatePromptCounterPrefKey, 0);
-            if(launches > 5 && prompts == 0)
+            int prompts =  prefs.getInt(RatePromptCounterPrefKey, 0);
+            if(launches > 5 && prompts == 0 || true)
             {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setView(getLayoutInflater().inflate(R.layout.rate_app_prompt, null));
-                
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
-                        try {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                        } catch (android.content.ActivityNotFoundException anfe) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                        }
-                        dialog.cancel();
-                    }
-                });
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                builder.show();
-                editor.putInt(RatePromptCounterPrefKey, prompts+1);
+                showRatePrompt();
+                editor.putInt(RatePromptCounterPrefKey, prompts + 1);
             }
         }
 
@@ -351,6 +327,12 @@ public class MainActivity extends AppCompatActivity {
         }
         //RepopulateVolumeDataListViewAdapter(new VolumeData[]{new VolumeData("Master", .95f, false, -1, "0"), new VolumeData("System", .65f, false, 0, "1"), new VolumeData("Firefox", .95f, false, 1, "2"), new VolumeData("Spotify", .30f, false, 3, "3"), new VolumeData("Steam", .10f, false, 5, "66")});
         //RefreshServerListValues(new VolumeServer[]{new VolumeServer(false, "Mika-PC", "192.168.0.122"), new VolumeServer(true, "SERVER", "192.168.0.117", "123"), new VolumeServer(false, "Work-PC", "192.168.0.217", "3rt4"), new VolumeServer(true, "SERVER1", "192.168.0.118"), new VolumeServer(true, "SERVER2", "192.168.0.119")});
+    }
+
+    private void showRatePrompt(){
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        RateAppDialog rateDialog = new RateAppDialog();
+        rateDialog.show(fm, "rate-dialog");
     }
 
     @Override
@@ -746,8 +728,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                         else if(title.equals(getString(R.string.main_menu_feedback)))
                         {
-                            //Intent feedbackIntent = new Intent(MainActivity.Instance, feedback.class);
-                            //startActivity(feedbackIntent);
+                            FeedbackDialog feedbackDialog = new FeedbackDialog();
+                            feedbackDialog.setFeedbackType(FeedbackDialog.FeedbackType.NEUTRAL_FEEDBACK);
+                            feedbackDialog.show(getSupportFragmentManager(), "menu-feedback-dialog");
                         }
 
                         return true;
