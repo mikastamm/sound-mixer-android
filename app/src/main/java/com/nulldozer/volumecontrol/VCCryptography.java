@@ -188,7 +188,6 @@ public class VCCryptography {
 
         byte[] modulus = Base64.decode(sKey.Modulus, 0);
         byte[] exponent = Base64.decode(sKey.Exponent, 0);
-        Log.i(TAG, "Modulus:  " + modulus.length * 8 + " bit\nExponent " + exponent.length * 8 + " bit");
         BigInteger modBigInteger = new BigInteger(1,modulus);
         BigInteger exBigInteger = new BigInteger(1,exponent);
 

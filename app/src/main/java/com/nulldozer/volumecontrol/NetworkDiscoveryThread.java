@@ -170,19 +170,15 @@ public class NetworkDiscoveryThread implements Runnable {
                     final VolumeServer server = JSONManager.deserialize(serverData, VolumeServer.class); //TESTCASE: invalid json
                     server.IPAddress = socket.getRemoteSocketAddress().toString();
 
-                    if(server.RSAPublicKey == activeVolumeServerRSAKey)
+                    if(server.RSAPublicKey.equals(activeVolumeServerRSAKey))
                     {
                         server.active = true;
                     }
 
                     final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
-                    String stdPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
-                    Log.i(TAG, "Saved Standard password = " + stdPassword);
+                    server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
 
-                    server.standardPassword = stdPassword;
-
-
-                    if(server.IPAddress.indexOf(":") != -1)
+                    if(server.IPAddress.contains(":"))
                     {
                         server.IPAddress = server.IPAddress.substring(0, server.IPAddress.indexOf(":"));
                     }
@@ -216,8 +212,8 @@ public class NetworkDiscoveryThread implements Runnable {
 
                                 lastConnectedRsaKey = prefs.getString(PrefKeys.LastConnectedServer_PrefKey, null);
 
-                                if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && (lastConnected = MainActivity.Instance.serverListViewAdapter.getItem(lastConnectedRsaKey)) != null){
-                                    MainActivity.Instance.serverListViewAdapter.setActive(lastConnected);
+                                if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && lastConnectedRsaKey.equals(server.RSAPublicKey)){
+                                    MainActivity.Instance.serverListViewAdapter.setActive(server);
                                 }
                                 else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
                                 {

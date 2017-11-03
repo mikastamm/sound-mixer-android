@@ -21,8 +21,6 @@ public class VolumeServer {
 
     public boolean active;
 
-    private final String SALT = "1AQQB-90KXZ-Z1Y91-UINT8";
-
     public VolumeServer(boolean hasPassword, String name, String IPAddress, String standardPassword)
     {
         this.name = name;
@@ -37,10 +35,6 @@ public class VolumeServer {
         this.IPAddress = IPAddress;
         this.standardPassword = "";
         this.hasPassword = hasPassword;
-    }
-
-    public String getHashedPassword(){
-        return  VCCryptography.getMD5Hash(SALT + standardPassword);
     }
 
     @Override

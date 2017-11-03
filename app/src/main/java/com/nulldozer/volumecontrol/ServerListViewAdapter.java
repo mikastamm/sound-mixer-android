@@ -105,8 +105,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
             newActive.active = true;
             activeServer = newActive;
 
-            MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit().putString("ActiveServer_pRSAKey", activeServer.RSAPublicKey);
-            MainActivity.Instance.clientFragment.clientThread.close();
+            MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit().putString("ActiveServer_pRSAKey", activeServer.RSAPublicKey).apply();
             MainActivity.Instance.clientFragment.clientThread = new ClientThread();
         }
         else{

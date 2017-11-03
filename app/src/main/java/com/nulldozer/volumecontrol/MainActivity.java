@@ -9,11 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -124,6 +126,14 @@ public class MainActivity extends AppCompatActivity {
         orientationManager = new OrientationManager(this);
         sidebarController = new SidebarController(this, orientationManager.isLandscape);
 
+        Button btnTryAgain = (Button)findViewById(R.id.btnTryAgain);
+        btnTryAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new NetworkDiscoveryThread().start();
+            }
+        });
+
         final ImageView expandImg = (ImageView) findViewById(R.id.expandImg);
         if(orientationManager.isLandscape)
         {
@@ -148,8 +158,6 @@ public class MainActivity extends AppCompatActivity {
         //RepopulateVolumeDataListViewAdapter(new VolumeData[]{new VolumeData("Master", .95f, false, -1, "0"), new VolumeData("System", .65f, false, 0, "1"), new VolumeData("Firefox", .95f, false, 1, "2"), new VolumeData("Spotify", .30f, false, 3, "3"), new VolumeData("Steam", .10f, false, 5, "66")});
         //RefreshServerListValues(new VolumeServer[]{new VolumeServer(false, "Mika-PC", "192.168.0.122"), new VolumeServer(true, "SERVER", "192.168.0.117", "123"), new VolumeServer(false, "Work-PC", "192.168.0.217", "3rt4"), new VolumeServer(true, "SERVER1", "192.168.0.118"), new VolumeServer(true, "SERVER2", "192.168.0.119")});
     }
-
-
 
     @Override
     protected void onSaveInstanceState (Bundle outState)
@@ -197,6 +205,44 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(PrefKeys.ShowInstallInstructionsOnStart_PrefKey, false);
         editor.apply();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    VolumeData masterVolume = listViewAdapterVolumeSliders.getMasterVolumeData();
+                    if(masterVolume.volume < 0.9)
+                    {
+                        masterVolume.volume += 0.1;
+                    }
+                    else{
+                        masterVolume.volume = 1;
+                    }
+                    clientFragment.clientThread.sendVolumeData(masterVolume);
+                }
+
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    VolumeData masterVolume = listViewAdapterVolumeSliders.getMasterVolumeData();
+                    if(masterVolume.volume > 0.1)
+                    {
+                        masterVolume.volume -= 0.1;
+                    }
+                    else{
+                        masterVolume.volume = 0;
+                    }
+                    clientFragment.clientThread.sendVolumeData(masterVolume);
+                }
+
+                return true;
+            default:
+                return super.dispatchKeyEvent(event);
+        }
     }
 
     @Override

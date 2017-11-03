@@ -42,6 +42,15 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
             progressBarDrawables = new HashMap<>();
         }
 
+        public VolumeData getMasterVolumeData(){
+            for(VolumeData d : listElements)
+            {
+                if(d.title.equals("Master"))
+                    return d;
+            }
+            return null;
+        }
+
         @Override
         public void clear()
         {
@@ -58,11 +67,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
             final VolumeData vm = listElements.get(position);
-            if(vm.title.equals("Master"))
-            {
-                Log.i("d","d");
-            }
-            Log.i("PPPPPPPP", "Pos: " + position + " Count:" + listElements.size());
+
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
 

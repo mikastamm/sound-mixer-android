@@ -203,6 +203,17 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/download_server_url"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="or"
+                android:layout_gravity="center"/>
+            <Button
+                android:id="@+id/btnTryAgain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="try again"/>
         </LinearLayout>
         <ProgressBar
             android:id="@+id/pbConnecting"

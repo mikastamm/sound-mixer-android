@@ -39,12 +39,13 @@ public class ClientThread{
     public ClientThread(){
         if(MainActivity.Instance.serverListViewAdapter.activeServer != null) {
             activeServer = MainActivity.Instance.serverListViewAdapter.activeServer;
+            Thread connectThread = new Thread(connectToDataPort);
+            connectThread.start();
         }
         else{
-            activeServer = new VolumeServer(false, "", "");
+            Log.i(TAG, "Active server null, aborting");
+            close();
         }
-        Thread connectThread = new Thread(connectToDataPort);
-        connectThread.start();
     }
 
     public void close(){
@@ -72,23 +73,13 @@ public class ClientThread{
         MainActivity.Instance.listViewAdapterVolumeSliders.clear();
     }
 
+
     public void send(String data)
     {
-        try {
             if(outWriter != null) {
-                byte[] encryptedData = VCCryptography.encrypt((activeServer.hasPassword ? activeServer.getHashedPassword() + ";" : "") + data, activeServer.RSAPublicKey);
-                if (encryptedData != null) {
-                    byte[] base64Data = Base64.encode(encryptedData, Base64.NO_WRAP);
-                    String encryptedString = new String(base64Data, "UTF-8");
-                    outWriter.println(encryptedString);
-                    outWriter.flush();
-                }
+                outWriter.println(data);
+                outWriter.flush();
             }
-        }
-        catch (UnsupportedEncodingException ex)
-        {
-            ex.printStackTrace();
-        }
     }
 
     public Runnable connectToDataPort = new Runnable() {
@@ -118,6 +109,8 @@ public class ClientThread{
 
                 outWriter.println("DEVINFO" + JSONManager.serialize(thisDevice));
                 outWriter.flush();
+
+                sendAuthentication();
 
                 listenerThread = new Thread(receiveAudioData);
                 listenerThread.start();
@@ -161,6 +154,7 @@ public class ClientThread{
         public void run() {
             if(connected && socket != null && outWriter != null)
             {
+
                 String toSend = JSONManager.serialize(data);
                 send("EDIT"+toSend);
 
@@ -227,6 +221,15 @@ public class ClientThread{
         }
     };
 
+    //So geht encryption
+    // byte[] encryptedData = VCCryptography.encrypt((activeServer.hasPassword ? activeServer.getHashedPassword() + ";" : "") + data, activeServer.RSAPublicKey);
+    //             if (encryptedData != null) {
+    //     byte[] base64Data = Base64.encode(encryptedData, Base64.NO_WRAP);
+    //     String encryptedString = new String(base64Data, "UTF-8");
+    //     outWriter.println(encryptedString);
+    //    outWriter.flush();
+
+
     public Runnable receiveAudioData = new Runnable() {
         @Override
         public void run() {
@@ -240,7 +243,11 @@ public class ClientThread{
                         if (currentMessage != null && !Thread.interrupted()) {
                             final String msg = currentMessage;//VCCryptography.getDecryptedMessage(currentMessage);
                             Log.i("ClientThread", "received: " + msg);
-                            if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
+
+                            if(msg.equals("AUTH")){
+                                sendAuthentication();
+                            }
+                            else if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
                                 SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
                                 editor.putString(PrefKeys.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
                                 editor.apply();
@@ -409,6 +416,20 @@ public class ClientThread{
             }
         }
     };
+
+    public void sendAuthentication(){
+        try {
+            byte[] encryptedData = VCCryptography.encrypt(VCCryptography.getMD5Hash(activeServer.standardPassword), activeServer.RSAPublicKey);
+            byte[] base64Data = Base64.encode(encryptedData, Base64.NO_WRAP);
+            String encryptedString = new String(base64Data, "UTF-8");
+            String authMessage = "AUTH" + encryptedString;
+            send(authMessage);
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 
     private enum MessageType{INIT, ADD, REMOVE, ICON}
 
