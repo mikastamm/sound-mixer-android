@@ -10,13 +10,15 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.util.Set;
+
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState)
     {
         requestWindowFeature(Window.FEATURE_ACTION_BAR);
-        if(MainActivity.useFullscreen)
+        if(Settings.useFullscreen)
         {
             this.requestWindowFeature(Window.FEATURE_NO_TITLE);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

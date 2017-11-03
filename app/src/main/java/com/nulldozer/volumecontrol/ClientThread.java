@@ -69,7 +69,7 @@ public class ClientThread{
         if(listenerThread != null)
         listenerThread.interrupt();
 
-        MainActivity.Instance.adapter.clear();
+        MainActivity.Instance.listViewAdapterVolumeSliders.clear();
     }
 
     public void send(String data)
@@ -100,11 +100,11 @@ public class ClientThread{
                 MainActivity.Instance.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        MainActivity.Instance.onConnect(activeServer);
+                        MainActivity.Instance.networkEventHandlers.onConnect(activeServer);
                     }
                 });
 
-                socket = new Socket(InetAddress.getByName(activeServer.IPAddress), MainActivity.SERVER_CONNECTION_TCP_PORT);
+                socket = new Socket(InetAddress.getByName(activeServer.IPAddress), Constants.SERVER_CONNECTION_TCP_PORT);
                 inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 outstream = socket.getOutputStream();
                 outWriter = new PrintWriter(outstream);
@@ -242,7 +242,7 @@ public class ClientThread{
                             Log.i("ClientThread", "received: " + msg);
                             if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
                                 SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                                editor.putString(MainActivity.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
+                                editor.putString(PrefKeys.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
                                 editor.apply();
 
                                 String vDataJson = msg.substring(3);
@@ -251,7 +251,7 @@ public class ClientThread{
                                 MainActivity.Instance.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        MainActivity.Instance.onAudioSessionListReceived(activeServer, recv);
+                                        MainActivity.Instance.networkEventHandlers.onAudioSessionListReceived(activeServer, recv);
                                     }
                                 });
 
@@ -263,9 +263,9 @@ public class ClientThread{
                                         String vDataJson = msg.substring(3);
 
                                         VolumeData recv = JSONManager.deserialize(vDataJson, VolumeData.class);
-                                        MainActivity.Instance.adapter.add(recv);
-                                        MainActivity.Instance.adapter.refreshProgressDrawables = true;
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.add(recv);
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
                             } else if (msg.startsWith("EDIT")) // Edit an existing AudioSession
@@ -279,18 +279,18 @@ public class ClientThread{
                                         VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
 
                                         if(received != null) {
-                                            for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
-                                                if (MainActivity.Instance.adapter.listElements.get(i).id.equals(received.id)) {
-                                                    if (!(MainActivity.Instance.adapter.listElements.get(i).mute != received.mute && MainActivity.Instance.adapter.listElements.get(i).ignoreNextMute))
-                                                        MainActivity.Instance.adapter.listElements.set(i, received);
+                                            for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                                if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                                                    if (!(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).mute != received.mute && MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute))
+                                                        MainActivity.Instance.listViewAdapterVolumeSliders.listElements.set(i, received);
                                                     else
-                                                        MainActivity.Instance.adapter.listElements.get(i).ignoreNextMute = false;
+                                                        MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute = false;
 
                                                     break;
                                                 }
                                             }
 
-                                            MainActivity.Instance.adapter.notifyDataSetChanged();
+                                            MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                         }
                                     }
                                 });
@@ -303,17 +303,17 @@ public class ClientThread{
 
                                         VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
 
-                                        for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
+                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
 
-                                            if (MainActivity.Instance.adapter.listElements.get(i).id.equals(received.id)) {
-                                                MainActivity.Instance.adapter.listElements.remove(i);
+                                            if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                                                MainActivity.Instance.listViewAdapterVolumeSliders.listElements.remove(i);
                                                 Log.i("ClientThread", "Removing item");
                                                 break;
                                             }
 
                                         }
 
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
                             }
@@ -325,24 +325,24 @@ public class ClientThread{
                                 MainActivity.Instance.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
+                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
                                             for (int j = 0; j < icons.length; j++) {
-                                                if (MainActivity.Instance.adapter.listElements.get(i).id.equals(icons[j].id)) {
+                                                if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icons[j].id)) {
 
                                                     byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP); //TODO: If more performance needed move this out of run on ui
                                                     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
 
                                                     if (bitmap == null) {
-                                                        MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
+                                                        MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
                                                     } else {
-                                                        MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, bitmap);
+                                                        MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
                                                     }
 
 
                                                 }
                                             }
                                         }
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
 
@@ -359,16 +359,16 @@ public class ClientThread{
                                     @Override
                                     public void run() {
 
-                                        for (int i = 0; i < MainActivity.Instance.adapter.listElements.size(); i++) {
-                                            if (MainActivity.Instance.adapter.listElements.get(i).id.equals(icon.id)) {
+                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                            if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icon.id)) {
                                                 if (bitmap == null) {
-                                                    MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
+                                                    MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
                                                 } else {
-                                                    MainActivity.Instance.adapter.sessionIcons.put(MainActivity.Instance.adapter.listElements.get(i).id, bitmap);
+                                                    MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
                                                 }
                                             }
                                         }
-                                        MainActivity.Instance.adapter.notifyDataSetChanged();
+                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
 
@@ -379,7 +379,7 @@ public class ClientThread{
 
                                 SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString(MainActivity.ServerStandardPasswordPrefix_PrefKey+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
+                                editor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
                                 editor.apply();
 
                                 MainActivity.Instance.runOnUiThread(new Runnable() {

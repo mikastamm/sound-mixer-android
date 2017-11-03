@@ -33,10 +33,10 @@
             android:entries="@array/orientations"
             android:entryValues="@array/orientations"
             android:defaultValue="0" />
-        <CheckBoxPreference
+      <!--  <CheckBoxPreference
             android:key="pref_key_hide_application_icon"
             android:title="@string/settings_ui_hide_application_icon"
-            android:summary="@string/settings_ui_hide_application_icon_description"/>
+            android:summary="@string/settings_ui_hide_application_icon_description"/>-->
         <CheckBoxPreference
             android:key="pref_key_show_ip"
             android:title="@string/settings_ui_show_ip"/>

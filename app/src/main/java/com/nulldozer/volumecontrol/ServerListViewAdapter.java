@@ -92,7 +92,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         }
 
         notifyDataSetChanged();
-        MainActivity.Instance.adapter.refreshProgressDrawables = true;
+        MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
     }
 
     public void setActive(VolumeServer newActive){
@@ -147,23 +147,23 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         ImageView lockIcon = (ImageView) convertView.findViewById(R.id.lockIcon);
         TextView serverName = (TextView) convertView.findViewById(R.id.tvServerName);
         TextView serverIP = (TextView) convertView.findViewById(R.id.tvServerIP);
-        //LinearLayout llElevation = (LinearLayout)convertView.findViewById(R.id.llServerShadowWrapper);
+        LinearLayout llBackground = (LinearLayout)convertView.findViewById(R.id.llServerShadowWrapper);
 
         // Populate the data into the template view using the data object
-        if(MainActivity.nightmode)
+        if(Settings.nightmode)
         {
-           // llElevation.setBackgroundResource(R.color.colorBackgroundSecondaryNight);
+            llBackground.setBackgroundResource(R.color.colorBackgroundSecondaryNight);
             serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
             serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
         }
         else{
-           // llElevation.setBackgroundResource(R.color.colorBackground);
+            llBackground.setBackgroundResource(R.color.colorBackground);
             serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
             serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
         }
 
 
-        if(!MainActivity.showServerIpInServerBrowser)
+        if(!Settings.showServerIpInServerBrowser)
         {
             serverIP.setVisibility(View.GONE);
         }
@@ -191,7 +191,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         else{
             serverIcon.setImageResource(R.mipmap.server_icon);
             serverName.setTypeface(null, Typeface.NORMAL);
-            serverIcon.setImageResource(MainActivity.system_icon_res_id);
+            serverIcon.setImageResource(IconResourceIDs.system_icon_res_id);
         }
 
         if(!vm.hasPassword)

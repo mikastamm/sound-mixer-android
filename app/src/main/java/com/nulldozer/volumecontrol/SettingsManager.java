@@ -18,35 +18,35 @@ public class SettingsManager {
             Log.i(TAG, "OnPreferenceChanged: " + key);
             if(key.equals("pref_key_show_ip"))
             {
-                MainActivity.showServerIpInServerBrowser = sharedPreferences.getBoolean(key, false);
-                Log.i(TAG, "ShowServerIPs: " + MainActivity.showServerIpInServerBrowser);
+                Settings.showServerIpInServerBrowser = sharedPreferences.getBoolean(key, false);
+                Log.i(TAG, "ShowServerIPs: " + Settings.showServerIpInServerBrowser);
                 MainActivity.Instance.serverListViewAdapter.notifyDataSetChanged();
             }
             else if(key.equals("pref_key_fullscreen"))
             {
-                MainActivity.useFullscreen = sharedPreferences.getBoolean(key, false);
-                if(!MainActivity.useFullscreen)
+                Settings.useFullscreen = sharedPreferences.getBoolean(key, false);
+                if(!Settings.useFullscreen)
                 {
-                    MainActivity.Instance.showSystemUI();
+                    MainActivity.Instance.fullscreen.disable();
                 }
             }
             else if(key.equals("pref_key_hide_application_icon"))
             {
-                MainActivity.hideApplicationIcons = preferences.getBoolean(key, false);
-                MainActivity.Instance.adapter.notifyDataSetChanged();
+                Settings.hideApplicationIcons = preferences.getBoolean(key, false);
+                MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
             }
             else if(key.equals("pref_key_nightmode"))
             {
-                MainActivity.nightmode = preferences.getBoolean(key, false);
-                MainActivity.Instance.setNightMode(MainActivity.nightmode);
+                Settings.nightmode = preferences.getBoolean(key, false);
+                Nightmode.setEnabled(MainActivity.Instance, Settings.nightmode);
             }
             else if(key.equals("pref_key_auto_connect_last"))
             {
-                MainActivity.autoConnectToLastConnectedServer = preferences.getBoolean(key, true);
+                Settings.autoConnectToLastConnectedServer = preferences.getBoolean(key, true);
             }
             else if(key.equals("pref_key_auto_connect_open"))
             {
-                MainActivity.autoConnectToServersWithoutPassword = preferences.getBoolean(key, false);
+                Settings.autoConnectToServersWithoutPassword = preferences.getBoolean(key, false);
             }
             else if(key.equals("pref_key_orientation"))
             {
@@ -54,15 +54,15 @@ public class SettingsManager {
 
                 if(val.equals("Auto"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.AUTO;
+                    Settings.appOrientation = Orientation.AUTO;
                 }
                 else if(val.equals("Portrait"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.PORTRAIT;
+                    Settings.appOrientation = Orientation.PORTRAIT;
                 }
                 else if(val.equals("Landscape"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.LANDSCAPE;
+                    Settings.appOrientation = Orientation.LANDSCAPE;
                 }
 
                 MainActivity.Instance.recreate();
@@ -81,37 +81,37 @@ public class SettingsManager {
             String key = entry.getKey();
             if(key.equals("pref_key_show_ip"))
             {
-                MainActivity.showServerIpInServerBrowser = preferences.getBoolean(key, false);
-                Log.i(TAG, "ShowServerIPs: " + MainActivity.showServerIpInServerBrowser);
+                Settings.showServerIpInServerBrowser = preferences.getBoolean(key, false);
+                Log.i(TAG, "ShowServerIPs: " + Settings.showServerIpInServerBrowser);
                 MainActivity.Instance.serverListViewAdapter.notifyDataSetChanged();
                 MainActivity.Instance.serverListViewAdapter.notifyDataSetInvalidated();
             }
             else if(key.equals("pref_key_fullscreen"))
             {
-                MainActivity.useFullscreen = preferences.getBoolean(key, false);
+                Settings.useFullscreen = preferences.getBoolean(key, false);
             }
             else if(key.equals("pref_key_hide_application_icon"))
             {
-                MainActivity.hideApplicationIcons = preferences.getBoolean(key, false);
-                MainActivity.Instance.adapter.notifyDataSetChanged();
+                Settings.hideApplicationIcons = preferences.getBoolean(key, false);
+                MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
                 MainActivity.Instance.serverListViewAdapter.notifyDataSetInvalidated();
             }
             else if(key.equals("pref_key_nightmode"))
             {
-                MainActivity.nightmode = preferences.getBoolean(key, false);
-                MainActivity.Instance.setNightMode(MainActivity.nightmode);
+                Settings.nightmode = preferences.getBoolean(key, false);
+                Nightmode.setEnabled(MainActivity.Instance, Settings.nightmode);
             }
             else if(key.equals("pref_key_auto_connect_last"))
             {
-                MainActivity.autoConnectToLastConnectedServer = preferences.getBoolean(key, true);
+                Settings.autoConnectToLastConnectedServer = preferences.getBoolean(key, true);
             }
             else if(key.equals("pref_key_auto_connect_open"))
             {
-                MainActivity.autoConnectToServersWithoutPassword = preferences.getBoolean(key, false);
+                Settings.autoConnectToServersWithoutPassword = preferences.getBoolean(key, false);
             }
             else if(key.equals("pref_key_reduce_sensitivity"))
             {
-                MainActivity.reduceSliderSensitivity = preferences.getBoolean(key, false);
+                Settings.reduceSliderSensitivity = preferences.getBoolean(key, false);
             }
             else if(key.equals("pref_key_orientation"))
             {
@@ -119,15 +119,15 @@ public class SettingsManager {
                 Log.i(TAG, "Forced Orientation: " + val);
                 if(val.equals("Auto"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.AUTO;
+                    Settings.appOrientation = Orientation.AUTO;
                 }
                 else if(val.equals("Portrait"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.PORTRAIT;
+                    Settings.appOrientation = Orientation.PORTRAIT;
                 }
                 else if(val.equals("Landscape"))
                 {
-                    MainActivity.appOrientation = MainActivity.Orientation.LANDSCAPE;
+                    Settings.appOrientation = Orientation.LANDSCAPE;
                 }
             }
         }

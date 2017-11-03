@@ -4,21 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.StrictMode;
-import android.provider.SyncStateContract;
-import android.telecom.Call;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
-
-import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,18 +15,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.Buffer;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by Mika on 18.08.2017.
@@ -50,7 +30,7 @@ public class NetworkDiscoveryThread implements Runnable {
     private final String TAG = "NetworkDiscoveryThread";
     private Thread t;
     private static Set<VolumeServer> servers = Collections.synchronizedSet(new HashSet<VolumeServer>());
-    public final long SERVER_SEARCH_TIMEOUT_IN_MILLISECONDS = (int)(MainActivity.Instance.maximalResponseTimeForServerInSeconds * 1000);
+    public final long SERVER_SEARCH_TIMEOUT_IN_MILLISECONDS = (int)(Constants.maximalResponseTimeForServerInSeconds * 1000);
     String activeVolumeServerRSAKey;
 
     public NetworkDiscoveryThread() {
@@ -65,7 +45,7 @@ public class NetworkDiscoveryThread implements Runnable {
             @Override
             public void run() {
                 main.serverListViewAdapter.listElements.clear();
-                main.onNetworkDiscoveryStarted();
+                main.networkEventHandlers.onNetworkDiscoveryStarted();
                 main.serverListViewAdapter.notifyDataSetChanged();
             }
         });
@@ -86,7 +66,7 @@ public class NetworkDiscoveryThread implements Runnable {
 
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(MainActivity.NETWORK_DISCOVERY_TCP_PORT);
+            serverSocket = new ServerSocket(Constants.NETWORK_DISCOVERY_TCP_PORT);
 
             while (Calendar.getInstance().getTime().getTime() < endDate.getTime()) {
                 serverSocket.setSoTimeout((int) (endDate.getTime() - Calendar.getInstance().getTime().getTime()));
@@ -106,7 +86,7 @@ public class NetworkDiscoveryThread implements Runnable {
             main.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    main.onNetworkDiscoveryFinished();
+                    main.networkEventHandlers.onNetworkDiscoveryFinished();
                 }
             });
         }
@@ -132,7 +112,7 @@ public class NetworkDiscoveryThread implements Runnable {
             socket = new DatagramSocket();
             socket.setBroadcast(true);
             byte[] sendData = messageStr.getBytes();
-            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, getBroadcastAddress() , MainActivity.NETWORK_DISCOVERY_UDP_PORT);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, getBroadcastAddress() , Constants.NETWORK_DISCOVERY_UDP_PORT);
             socket.send(sendPacket);
             System.out.println(getClass().getName() + "Broadcast packet sent to: " + getBroadcastAddress().getHostAddress());
         } catch (IOException e) {
@@ -145,7 +125,7 @@ public class NetworkDiscoveryThread implements Runnable {
     }
 
     InetAddress getBroadcastAddress() throws IOException {
-        WifiManager wifi = (WifiManager) main.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = (WifiManager) main.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         DhcpInfo dhcp = wifi.getDhcpInfo();
         // handle null somehow
 
@@ -167,7 +147,6 @@ public class NetworkDiscoveryThread implements Runnable {
     }
 
     class GetNewServerInfoThread implements Runnable{
-
         private Thread t;
         private Socket socket;
 
@@ -197,7 +176,7 @@ public class NetworkDiscoveryThread implements Runnable {
                     }
 
                     final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
-                    String stdPassword = prefs.getString(MainActivity.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
+                    String stdPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
                     Log.i(TAG, "Saved Standard password = " + stdPassword);
 
                     server.standardPassword = stdPassword;
@@ -216,12 +195,12 @@ public class NetworkDiscoveryThread implements Runnable {
                     main.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            MainActivity.Instance.onServerDiscovered(server);
+                            MainActivity.Instance.networkEventHandlers.onServerDiscovered(server);
                         }
                     });
 
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean(MainActivity.FirstConnectHappened_PrefKey, true);
+                    editor.putBoolean(PrefKeys.FirstConnectHappened_PrefKey, true);
                     editor.apply();
 
                     //Connect to the found Server if not connected and allowed in settings
@@ -235,12 +214,12 @@ public class NetworkDiscoveryThread implements Runnable {
                                 String lastConnectedRsaKey;
                                 VolumeServer passwordLessServer;
 
-                                lastConnectedRsaKey = prefs.getString(MainActivity.LastConnectedServer_PrefKey, null);
+                                lastConnectedRsaKey = prefs.getString(PrefKeys.LastConnectedServer_PrefKey, null);
 
-                                if(MainActivity.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && (lastConnected = MainActivity.Instance.serverListViewAdapter.getItem(lastConnectedRsaKey)) != null){
+                                if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && (lastConnected = MainActivity.Instance.serverListViewAdapter.getItem(lastConnectedRsaKey)) != null){
                                     MainActivity.Instance.serverListViewAdapter.setActive(lastConnected);
                                 }
-                                else if(MainActivity.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
+                                else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
                                 {
                                     MainActivity.Instance.serverListViewAdapter.setActive(passwordLessServer);
                                 }

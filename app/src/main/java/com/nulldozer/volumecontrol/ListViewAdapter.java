@@ -57,8 +57,12 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
-            final VolumeData vm = getItem(position);
-
+            final VolumeData vm = listElements.get(position);
+            if(vm.title.equals("Master"))
+            {
+                Log.i("d","d");
+            }
+            Log.i("PPPPPPPP", "Pos: " + position + " Count:" + listElements.size());
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
 
@@ -79,7 +83,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
             {
                 int progress = vsbSeekBar.getProgress();
                 Rect bounds = vsbSeekBar.getProgressDrawable().getBounds();
-                progressBarDrawables.put(position, MainActivity.seekbar_progress_drawable.getConstantState().newDrawable());
+                progressBarDrawables.put(position, IconResourceIDs.seekbar_progress_drawable.getConstantState().newDrawable());
                 vsbSeekBar.setProgressDrawable(progressBarDrawables.get(position));
                 vsbSeekBar.getProgressDrawable().setBounds(bounds);
                 vsbSeekBar.setMax(0);
@@ -87,7 +91,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 vsbSeekBar.setProgress(progress);
             }
 
-            if(MainActivity.nightmode)
+            if(Settings.nightmode)
             {
                 txtApplicationName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
                 frlShadows.setBackgroundResource(R.drawable.seekbar_card_background_night);
@@ -97,7 +101,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 frlShadows.setBackgroundResource(R.drawable.seekbar_card_background);
             }
 
-            if(MainActivity.hideApplicationIcons)
+            if(Settings.hideApplicationIcons)
             {
                 imgBtn.setVisibility(View.GONE);
             }
@@ -118,11 +122,11 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
                         if (MainActivity.Instance.clientFragment.clientThread.connected) {
-                            if(!MainActivity.reduceSliderSensitivity || !vm.sentLast) {
+                            if(!Settings.reduceSliderSensitivity || !vm.sentLast) {
                                 vm.volume = progress / 100f;
                                 MainActivity.Instance.clientFragment.clientThread.sendVolumeData(vm);
 
-                                if(MainActivity.reduceSliderSensitivity)
+                                if(Settings.reduceSliderSensitivity)
                                 {
                                     vm.sentLast = true;
                                 }
@@ -146,7 +150,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     if (MainActivity.Instance.clientFragment.clientThread.connected) {
 
-                        if(MainActivity.reduceSliderSensitivity)
+                        if(Settings.reduceSliderSensitivity)
                         {
                             vm.volume = vsbSeekBar.getProgress() / 100f;
                             MainActivity.Instance.clientFragment.clientThread.sendVolumeData(vm);
@@ -184,7 +188,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                     scaleDown.start();
                 }
 
-                imgBtn.setBackgroundResource(MainActivity.mute_icon_res_id);
+                imgBtn.setBackgroundResource(IconResourceIDs.mute_icon_res_id);
 
                 if(vm.ignoreNextMute) {
                     final ValueAnimator scaleUp = ValueAnimator.ofFloat(0, 1);
@@ -226,7 +230,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                         imgBtn.setBackground(new BitmapDrawable(main.getResources(), sessionIcons.get(vm.id)));
                     }
                 } else {
-                    imgBtn.setBackgroundResource(MainActivity.application_icon_res_id);
+                    imgBtn.setBackgroundResource(IconResourceIDs.application_icon_res_id);
                 }
 
                 if(vm.ignoreNextMute) {
@@ -251,12 +255,15 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 txtApplicationName.setTypeface(null, Typeface.BOLD);
               //  divider.setLayoutParams(new LinearLayout.LayoutParams(4, ViewGroup.LayoutParams.MATCH_PARENT));
                 if(!vm.mute)
-                imgBtn.setBackgroundResource(MainActivity.master_icon_res_id);
+                imgBtn.setBackgroundResource(IconResourceIDs.master_icon_res_id);
             }
             else if(vm.title.equals("System"))//TODO: Use multilanguage title
             {
                 if(!vm.mute)
-                imgBtn.setBackgroundResource(MainActivity.system_icon_res_id);
+                imgBtn.setBackgroundResource(IconResourceIDs.system_icon_res_id);
+            }
+            else{
+                txtApplicationName.setTypeface(null, Typeface.NORMAL);
             }
 
             if(position == listElements.size()-1)
