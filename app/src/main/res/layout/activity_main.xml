@@ -204,6 +204,14 @@
                 android:layout_gravity="center"
                 android:text="@string/download_server_url"/>
         </LinearLayout>
+        <ProgressBar
+            android:id="@+id/pbConnecting"
+            android:visibility="gone"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:indeterminate="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="62dp"/>
     </FrameLayout>
 
 

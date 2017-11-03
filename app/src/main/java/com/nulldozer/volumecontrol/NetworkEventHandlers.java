@@ -4,6 +4,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,9 +33,23 @@ public class NetworkEventHandlers {
             MainActivity.Instance.serverRefreshByUser.swipeContainer.setRefreshing(true);
 
         serverCountTextView.setText("0 Servers");
+
+        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        pbConnecting.setVisibility(View.VISIBLE);
+
+        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
+        llConnectionTip.setVisibility(View.GONE);
+
     }
 
     public void onNetworkDiscoveryFinished(){
+        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        pbConnecting.setVisibility(View.GONE);
+
+        if(serverListViewAdapter.activeServer == null) {
+            LinearLayout llConnectionTip = (LinearLayout) MainActivity.Instance.findViewById(R.id.llConnectionTip);
+            llConnectionTip.setVisibility(View.VISIBLE);
+        }
 
         if (Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
             MainActivity.Instance.serverRefreshByUser.swipeContainer.setRefreshing(false);
@@ -78,6 +93,9 @@ public class NetworkEventHandlers {
 
     public void onAudioSessionListReceived(VolumeServer target, VolumeData[] audioSessions)
     {
+        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        pbConnecting.setVisibility(View.GONE);
+
         LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
         llConnectionTip.setVisibility(View.GONE);
 
