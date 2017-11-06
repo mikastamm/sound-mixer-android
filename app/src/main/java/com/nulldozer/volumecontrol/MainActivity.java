@@ -3,6 +3,7 @@ package com.nulldozer.volumecontrol;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
@@ -42,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
     public ServerListViewAdapter serverListViewAdapter;
 
     TwoWayView listViewVolumeSliders;
-    TwoWayView listViewServers;
 
     public static MainActivity Instance;
     public ClientFragment clientFragment;
@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     OrientationManager orientationManager;
     SidebarController sidebarController;
     ServerRefreshByUser serverRefreshByUser;
+    BroadcastReceiverThread broadcastReceiver;
+    ServerListFragment serverListFragment;
 
     @Override
     public void onPause() {
@@ -99,11 +101,15 @@ public class MainActivity extends AppCompatActivity {
         listViewVolumeSliders = (TwoWayView) findViewById(R.id.lvVolumeSliders);
         listViewVolumeSliders.setAdapter(listViewAdapterVolumeSliders);
 
-        initializeServerListView();
+        serverListFragment = (ServerListFragment)getSupportFragmentManager().findFragmentById(R.id.fragmentServerList);
+        serverListFragment.initialize();
 
         clientFragment = getClientFragment();
         if(!fragmentRetained)
             new NetworkDiscoveryThread().start();
+
+        broadcastReceiver = new BroadcastReceiverThread();
+        broadcastReceiver.start();
 
         serverRefreshByUser = new ServerRefreshByUser(this);
         networkEventHandlers = new NetworkEventHandlers(listViewAdapterVolumeSliders, serverListViewAdapter);
@@ -138,12 +144,12 @@ public class MainActivity extends AppCompatActivity {
         if(orientationManager.isLandscape)
         {
             listViewVolumeSliders.setOrientation(TwoWayView.Orientation.HORIZONTAL);
-            listViewServers.setOrientation(TwoWayView.Orientation.VERTICAL);
+            serverListFragment.listViewServers.setOrientation(TwoWayView.Orientation.VERTICAL);
             expandImg.setRotation(0);
         }
         else{
             listViewVolumeSliders.setOrientation(TwoWayView.Orientation.VERTICAL);
-            listViewServers.setOrientation(TwoWayView.Orientation.HORIZONTAL);
+            serverListFragment.listViewServers.setOrientation(TwoWayView.Orientation.HORIZONTAL);
             expandImg.setRotation(90);
         }
 
@@ -251,111 +257,6 @@ public class MainActivity extends AppCompatActivity {
         if (Settings.useFullscreen) {
             fullscreen.enable();
         }
-    }
-
-    public void initializeServerListView(){
-        serverListViewAdapter = new ServerListViewAdapter(this, new ArrayList<VolumeServer>());
-
-        listViewServers = (TwoWayView) findViewById(R.id.listViewServers);
-        listViewServers.setAdapter(serverListViewAdapter);
-
-        listViewServers.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                final int pos = position;
-
-                PopupMenu popup = new PopupMenu(MainActivity.Instance, view);
-                MenuInflater inflater = popup.getMenuInflater();
-                inflater.inflate(R.menu.overflow_menu_server, popup.getMenu());
-                popup.show();
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle().equals(getString(R.string.server_menu_forget))) {
-                            SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-                            editor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(serverListViewAdapter.listElements.get(pos).RSAPublicKey), "");
-                            serverListViewAdapter.listElements.get(pos).standardPassword = "";
-                            editor.apply();
-
-                            Log.i(TAG, "Forgot password for " + serverListViewAdapter.listElements.get(pos).name);
-                        } else if (item.getTitle().equals(getString(R.string.server_menu_disconnect))) {
-                            MainActivity.Instance.serverListViewAdapter.removeActive();
-                            MainActivity.Instance.listViewAdapterVolumeSliders.clear();
-
-                            SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                            editor.putString(PrefKeys.LastConnectedServer_PrefKey, null);
-                            editor.apply();
-                        }
-                        return true;
-                    }
-                });
-
-                return true;
-            }
-        });
-
-        listViewServers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final VolumeServer selectedServer = serverListViewAdapter.listElements.get(position);
-                final int finalPosition = position;
-
-                if (MainActivity.Instance.serverListViewAdapter.getActive().equals(selectedServer.RSAPublicKey)) {
-                    Toast.makeText(MainActivity.Instance, "Already connected to " + selectedServer.name, Toast.LENGTH_SHORT).show();
-                } else if (selectedServer.hasPassword && selectedServer.standardPassword.equals("")) {
-                    final SharedPreferences prefs = MainActivity.Instance.getPreferences(MODE_PRIVATE);
-                    Log.i("MainActivity", "Selected server requires authentification, showing Password Dialog");
-                    Log.i(TAG, "Saved Password:" + prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(selectedServer.RSAPublicKey), ""));
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.Instance);
-                    builder.setTitle("Password");
-
-                    // Set up the input
-                    final EditText input = new EditText(MainActivity.Instance);
-                    FrameLayout container = new FrameLayout(MainActivity.Instance);
-                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    params.setMargins(getResources().getDimensionPixelSize(R.dimen.edit_text_margin), 0, getResources().getDimensionPixelSize(R.dimen.edit_text_margin), 0);
-                    input.setLayoutParams(params);
-
-                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    builder.setView(input);
-
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.i("MainActivity", "Password entered");
-
-
-                            SharedPreferences.Editor prefEditor = prefs.edit();
-
-                            selectedServer.standardPassword = input.getText().toString();
-                            prefEditor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(selectedServer.RSAPublicKey), selectedServer.standardPassword);
-                            prefEditor.apply();
-
-                            passwordDialogOpen = false;
-                            serverListViewAdapter.setActive(finalPosition);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.i("MainActivity", "Password dialog Canceled");
-                            passwordDialogOpen = false;
-                            dialog.cancel();
-                        }
-                    });
-
-                    builder.show();
-                    passwordDialogOpen = true;
-
-                } else {
-                    serverListViewAdapter.setActive(position);
-                }
-
-
-            }
-        });
     }
 
 

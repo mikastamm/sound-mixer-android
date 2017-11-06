@@ -1,5 +1,6 @@
 package com.nulldozer.volumecontrol;
 
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -26,20 +27,27 @@ public class NetworkEventHandlers {
         this.serverListViewAdapter = serverListViewAdapter;
     }
 
-    public void onNetworkDiscoveryStarted(){
+    public void onServerDisconnected(){
+        new NetworkDiscoveryThread().start();
+    }
+
+    public void onNetworkDiscoveryStarted(boolean silent){
         TextView serverCountTextView = ((TextView) MainActivity.Instance.findViewById(R.id.tvServerCount));
 
-        if (Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
+        if (!silent && Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
             MainActivity.Instance.serverRefreshByUser.swipeContainer.setRefreshing(true);
 
         serverCountTextView.setText("0 Servers");
 
-        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
-        pbConnecting.setVisibility(View.VISIBLE);
+        if(MainActivity.Instance.serverListViewAdapter.activeServer == null) {
+            ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+            pbConnecting.setVisibility(View.GONE);
+        }
 
-        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
-        llConnectionTip.setVisibility(View.GONE);
-
+        if(MainActivity.Instance.serverListViewAdapter.activeServer == null) {
+            LinearLayout llConnectionTip = (LinearLayout) MainActivity.Instance.findViewById(R.id.llConnectionTip);
+            llConnectionTip.setVisibility(View.GONE);
+        }
     }
 
     public void onNetworkDiscoveryFinished(){
@@ -69,8 +77,21 @@ public class NetworkEventHandlers {
             MainActivity.Instance.sidebarController.toggleSidebar();
     }
 
-    public void onServerDiscovered(VolumeServer server){
+    public void onServerDiscovered(final VolumeServer server){
         Log.i(TAG, "Found Server:" + server.toString());
+
+        final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
+        server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
+
+        if(server.IPAddress.contains(":"))
+        {
+            server.IPAddress = server.IPAddress.substring(0, server.IPAddress.indexOf(":"));
+        }
+
+        if(server.IPAddress.startsWith("/"))
+        {
+            server.IPAddress=server.IPAddress.substring(1);
+        }
 
         if(serverListViewAdapter.activeServer != null && serverListViewAdapter.activeServer.RSAPublicKey.equals(server.RSAPublicKey))
         {
@@ -85,10 +106,34 @@ public class NetworkEventHandlers {
         serverCountTextView.setText(serverListViewAdapter.getCount() + (serverListViewAdapter.getCount() == 1 ? " Server" : " Servers"));
 
         MainActivity.Instance.serverRefreshByUser.refreshServersTip.setVisibility(View.GONE);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PrefKeys.FirstConnectHappened_PrefKey, true);
+        editor.apply();
+
+        //Connect to the found Server if not connected and allowed in settings
+        if(MainActivity.Instance.serverListViewAdapter.activeServer == null)
+        {
+            VolumeServer lastConnected;
+            String lastConnectedRsaKey;
+            VolumeServer passwordLessServer;
+
+            lastConnectedRsaKey = prefs.getString(PrefKeys.LastConnectedServer_PrefKey, null);
+
+            if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && lastConnectedRsaKey.equals(server.RSAPublicKey)){
+                MainActivity.Instance.serverListViewAdapter.setActive(server);
+            }
+            else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
+            {
+                MainActivity.Instance.serverListViewAdapter.setActive(passwordLessServer);
+            }
+
+        }
     }
 
-    public void onConnect(VolumeServer target){
-
+    public void onConnectionInitiated(VolumeServer target){
+        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        pbConnecting.setVisibility(View.VISIBLE);
     }
 
     public void onAudioSessionListReceived(VolumeServer target, VolumeData[] audioSessions)

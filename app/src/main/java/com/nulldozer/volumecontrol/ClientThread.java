@@ -91,7 +91,7 @@ public class ClientThread{
                 MainActivity.Instance.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        MainActivity.Instance.networkEventHandlers.onConnect(activeServer);
+                        MainActivity.Instance.networkEventHandlers.onConnectionInitiated(activeServer);
                     }
                 });
 
@@ -408,7 +408,14 @@ public class ClientThread{
                             Log.i(TAG, "Connection to server lost");
                             ioe.printStackTrace();
                             close();
-                            new NetworkDiscoveryThread().start();
+
+                            MainActivity.Instance.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    MainActivity.Instance.networkEventHandlers.onServerDisconnected();
+                                }
+                            });
+
                             return;
                     }
                 }

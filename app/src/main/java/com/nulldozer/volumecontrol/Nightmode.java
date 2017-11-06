@@ -44,7 +44,7 @@ public class Nightmode {
             tvServerCount.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
             tvPullDown.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
-            mainActivity.listViewServers.setBackgroundResource(R.color.colorBackgroundNightLight);
+            mainActivity.serverListFragment.listViewServers.setBackgroundResource(R.color.colorBackgroundNightLight);
         }
         else{
             master_icon_res_id = R.mipmap.audio_icon;
@@ -62,7 +62,7 @@ public class Nightmode {
             llSidebar.setBackgroundResource(R.color.colorBackgroundSidebar);
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButton);
             twoWayViewSliders.setBackgroundResource(R.color.colorBackgroundSecondary);
-            mainActivity.listViewServers.setBackgroundResource(R.color.colorBackgroundSecondary);
+            mainActivity.serverListFragment.listViewServers.setBackgroundResource(R.color.colorBackgroundSecondary);
         }
 
         imgPullDown.setImageResource(pull_down_icon_res_id);

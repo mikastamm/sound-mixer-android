@@ -66,6 +66,10 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
     public void setActive(int position){
         VolumeServer newActive = getItem(position);
+        setActive(newActive);
+    }
+
+    public void setActive(VolumeServer newActive){
 
         if (activeServer != null) {
             activeServer.active = false;
@@ -73,11 +77,12 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
         if(newActive != null) {
             newActive.active = true;
+
+            if(MainActivity.Instance.clientFragment.clientThread != null)
+                MainActivity.Instance.clientFragment.clientThread.close();
+
             activeServer = newActive;
 
-            MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit().putString("ActiveServer_pRSAKey", activeServer.RSAPublicKey);
-            if(MainActivity.Instance.clientFragment.clientThread != null)
-            MainActivity.Instance.clientFragment.clientThread.close();
             MainActivity.Instance.clientFragment.clientThread = new ClientThread();
         }
         else{
@@ -93,37 +98,6 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
         notifyDataSetChanged();
         MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
-    }
-
-    public void setActive(VolumeServer newActive){
-
-        if (activeServer != null) {
-            activeServer.active = false;
-        }
-
-        if(newActive != null) {
-            newActive.active = true;
-            activeServer = newActive;
-
-            MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit().putString("ActiveServer_pRSAKey", activeServer.RSAPublicKey).apply();
-            MainActivity.Instance.clientFragment.clientThread = new ClientThread();
-        }
-        else{
-            if(listElements.size() > 0)
-            {
-                Log.i(TAG, "setActive(int position): Volume Server at $position not found, setting first element in ListView as active");
-                setActive(0);
-            }
-            else{
-                Log.i(TAG, "setActive(int position): Volume Server at $position not found and ListView empty, no active set");
-            }
-        }
-
-        notifyDataSetChanged();
-    }
-
-    public String getActive(){
-        return MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).getString("ActiveServer_pRSAKey", "");
     }
 
     @Override

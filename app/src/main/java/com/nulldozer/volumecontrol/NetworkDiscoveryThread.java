@@ -31,12 +31,15 @@ public class NetworkDiscoveryThread implements Runnable {
     private Thread t;
     private static Set<VolumeServer> servers = Collections.synchronizedSet(new HashSet<VolumeServer>());
     public final long SERVER_SEARCH_TIMEOUT_IN_MILLISECONDS = (int)(Constants.maximalResponseTimeForServerInSeconds * 1000);
-    String activeVolumeServerRSAKey;
+    private boolean silent = false;
+
 
     public NetworkDiscoveryThread() {
         main = MainActivity.Instance;
-
-        activeVolumeServerRSAKey = main.serverListViewAdapter.getActive();
+    }
+    public NetworkDiscoveryThread(boolean silent){
+        main = MainActivity.Instance;
+        this.silent = silent;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class NetworkDiscoveryThread implements Runnable {
             @Override
             public void run() {
                 main.serverListViewAdapter.listElements.clear();
-                main.networkEventHandlers.onNetworkDiscoveryStarted();
+                main.networkEventHandlers.onNetworkDiscoveryStarted(silent);
                 main.serverListViewAdapter.notifyDataSetChanged();
             }
         });
@@ -166,66 +169,18 @@ public class NetworkDiscoveryThread implements Runnable {
 
             if(!serverData.equals(""))
             {
-                try {
-                    final VolumeServer server = JSONManager.deserialize(serverData, VolumeServer.class); //TESTCASE: invalid json
-                    server.IPAddress = socket.getRemoteSocketAddress().toString();
+                final VolumeServer server = JSONManager.deserialize(serverData, VolumeServer.class);
+                if(server != null) {
+                server.IPAddress = socket.getRemoteSocketAddress().toString();
 
-                    if(server.RSAPublicKey.equals(activeVolumeServerRSAKey))
-                    {
-                        server.active = true;
+                main.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.Instance.networkEventHandlers.onServerDiscovered(server);
                     }
+                });
+            }
 
-                    final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
-                    server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
-
-                    if(server.IPAddress.contains(":"))
-                    {
-                        server.IPAddress = server.IPAddress.substring(0, server.IPAddress.indexOf(":"));
-                    }
-
-                    if(server.IPAddress.startsWith("/"))
-                    {
-                        server.IPAddress=server.IPAddress.substring(1);
-                    }
-
-                    main.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            MainActivity.Instance.networkEventHandlers.onServerDiscovered(server);
-                        }
-                    });
-
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean(PrefKeys.FirstConnectHappened_PrefKey, true);
-                    editor.apply();
-
-                    //Connect to the found Server if not connected and allowed in settings
-                    if(MainActivity.Instance.serverListViewAdapter.activeServer == null)
-                    {
-                        MainActivity.Instance.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                VolumeServer lastConnected;
-                                String lastConnectedRsaKey;
-                                VolumeServer passwordLessServer;
-
-                                lastConnectedRsaKey = prefs.getString(PrefKeys.LastConnectedServer_PrefKey, null);
-
-                                if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && lastConnectedRsaKey.equals(server.RSAPublicKey)){
-                                    MainActivity.Instance.serverListViewAdapter.setActive(server);
-                                }
-                                else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
-                                {
-                                    MainActivity.Instance.serverListViewAdapter.setActive(passwordLessServer);
-                                }
-                            }
-                        });
-                    }
-                }
-                catch(RuntimeException e) {
-                    e.printStackTrace();
-                }
             }
         }
 
