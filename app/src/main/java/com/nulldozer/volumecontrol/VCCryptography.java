@@ -114,7 +114,7 @@ public class VCCryptography {
     public static void generateRSAKeyPair(boolean ignoreGenerated){
         SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
         try {
-            if(ignoreGenerated || (prefs.getString(PrefKeys.RSAPrivateKey_PrefKey, null) == null && prefs.getString(PrefKeys.RSAPublicKey_PrefKey, null) == null))
+            if(ignoreGenerated || (prefs.getString(PrefKeys.RSAPrivateKey, null) == null && prefs.getString(PrefKeys.RSAPublicKey, null) == null))
             {
                 Log.i(TAG, "Keys not generated yet, now generating keys");
                 KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
@@ -131,16 +131,16 @@ public class VCCryptography {
 
                 SharedPreferences.Editor editor = prefs.edit();
 
-                editor.putString(PrefKeys.RSAPrivateKey_PrefKey, privateKeyBase64);
-                editor.putString(PrefKeys.RSAPublicKey_PrefKey, publicKeyBase64);
+                editor.putString(PrefKeys.RSAPrivateKey, privateKeyBase64);
+                editor.putString(PrefKeys.RSAPublicKey, publicKeyBase64);
                 editor.apply();
 
                 RSAPrivateKey = privateKey;
                 RSAPublicKey = (RSAPublicKey)publicKey;
             }
             else{
-                String privateKeyBase64 = prefs.getString(PrefKeys.RSAPrivateKey_PrefKey, null);
-                String publicKeyBase64 = prefs.getString(PrefKeys.RSAPublicKey_PrefKey, null);
+                String privateKeyBase64 = prefs.getString(PrefKeys.RSAPrivateKey, null);
+                String publicKeyBase64 = prefs.getString(PrefKeys.RSAPublicKey, null);
 
                 KeyFactory kf = KeyFactory.getInstance("RSA");
 

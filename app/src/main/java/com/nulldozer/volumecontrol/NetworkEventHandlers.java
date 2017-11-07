@@ -28,6 +28,7 @@ public class NetworkEventHandlers {
     }
 
     public void onServerDisconnected(){
+        if(MainActivity.Instance.serverListViewAdapter.listElements.size() == 0)
         new NetworkDiscoveryThread().start();
     }
 
@@ -54,7 +55,7 @@ public class NetworkEventHandlers {
         ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
         pbConnecting.setVisibility(View.GONE);
 
-        if(serverListViewAdapter.activeServer == null) {
+        if(serverListViewAdapter.listElements.size() == 0) {
             LinearLayout llConnectionTip = (LinearLayout) MainActivity.Instance.findViewById(R.id.llConnectionTip);
             llConnectionTip.setVisibility(View.VISIBLE);
         }
@@ -80,8 +81,11 @@ public class NetworkEventHandlers {
     public void onServerDiscovered(final VolumeServer server){
         Log.i(TAG, "Found Server:" + server.toString());
 
+        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
+        llConnectionTip.setVisibility(View.GONE);
+
         final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
-        server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
+        server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
 
         if(server.IPAddress.contains(":"))
         {
@@ -108,19 +112,15 @@ public class NetworkEventHandlers {
         MainActivity.Instance.serverRefreshByUser.refreshServersTip.setVisibility(View.GONE);
 
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(PrefKeys.FirstConnectHappened_PrefKey, true);
+        editor.putBoolean(PrefKeys.FirstConnectHappened, true);
         editor.apply();
 
         //Connect to the found Server if not connected and allowed in settings
         if(MainActivity.Instance.serverListViewAdapter.activeServer == null)
         {
-            VolumeServer lastConnected;
-            String lastConnectedRsaKey;
             VolumeServer passwordLessServer;
 
-            lastConnectedRsaKey = prefs.getString(PrefKeys.LastConnectedServer_PrefKey, null);
-
-            if(Settings.autoConnectToLastConnectedServer && lastConnectedRsaKey != null && lastConnectedRsaKey.equals(server.RSAPublicKey)){
+            if(Settings.autoConnectToLastConnectedServer && KnownServerHelper.isKnown(server.RSAPublicKey)){
                 MainActivity.Instance.serverListViewAdapter.setActive(server);
             }
             else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
@@ -146,11 +146,6 @@ public class NetworkEventHandlers {
 
         if (!MainActivity.Instance.fragmentRetained)
             Toast.makeText(MainActivity.Instance, "Connected to " + target.name, Toast.LENGTH_SHORT).show();
-
-        if(MainActivity.Instance.sidebarController.sideBarExpanded && !MainActivity.Instance.fragmentRetained)
-        {
-            MainActivity.Instance.sidebarController.toggleSidebar();
-        }
 
         //Fill the listViewVolumeSliders with the received data
         MainActivity.Instance.listViewAdapterVolumeSliders.clear();

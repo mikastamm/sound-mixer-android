@@ -23,7 +23,7 @@ public class RatePrompt {
     {
         this.activity = activity;
         prefs = activity.getPreferences(Context.MODE_PRIVATE);
-        prompts =  prefs.getInt(PrefKeys.RatePromptCounterPrefKey, 0);
+        prompts =  prefs.getInt(PrefKeys.RatePromptCounter, 0);
     }
 
     public boolean tryShow(){
@@ -33,7 +33,7 @@ public class RatePrompt {
         if(prompts == 0 && launches == showAfterLaunches) {
             RateAppDialog rateDialog = new RateAppDialog();
             rateDialog.show(fm, "rate-dialog");
-            editor.putInt(PrefKeys.RatePromptCounterPrefKey, prefs.getInt(PrefKeys.RatePromptCounterPrefKey, 0)+1);
+            editor.putInt(PrefKeys.RatePromptCounter, prefs.getInt(PrefKeys.RatePromptCounter, 0)+1);
             editor.apply();
             return true;
         }

@@ -193,7 +193,7 @@ public class SidebarController {
                 rotate.setDuration(250);
                 rotate.start();
 
-                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredWidth(), activity.getWindowManager().getDefaultDisplay().getWidth() / 5);
+                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredWidth(), activity.getWindowManager().getDefaultDisplay().getWidth() / 4);
                 anim.setEvaluator(easing);
                 anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override

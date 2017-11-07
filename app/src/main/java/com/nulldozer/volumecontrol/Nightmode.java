@@ -19,14 +19,13 @@ public class Nightmode {
     public static void setEnabled(MainActivity mainActivity, boolean enabled)
     {
         LinearLayout llSidebar = (LinearLayout)mainActivity.findViewById(R.id.sideBarContentLL);
-        FrameLayout serverCount = (FrameLayout)mainActivity.findViewById(R.id.serverCountWrapper);
         LinearLayout llExpandSidebar = (LinearLayout)mainActivity.findViewById(R.id.llExpandSidebar);
         ImageView imgPullDown = (ImageView)mainActivity.findViewById(R.id.imgPullDown);
         ImageView imgBtnPopupMenu = (ImageView)mainActivity.findViewById(R.id.imgBtnPopupMenuMain);
         ImageView expandImg = (ImageView) mainActivity.findViewById(R.id.expandImg);
         TextView tvPullDown = (TextView)mainActivity.findViewById(R.id.tvPullToRefresh);
-        TextView tvServerCount = (TextView)mainActivity.findViewById(R.id.tvServerCount);
         TwoWayView twoWayViewSliders =(TwoWayView)mainActivity.findViewById(R.id.lvVolumeSliders);
+        TwoWayView twoWayViewServers =(TwoWayView)mainActivity.findViewById(R.id.listViewServers);
 
         if(enabled) {
             master_icon_res_id = R.mipmap.audio_nightmode_icon;
@@ -39,12 +38,10 @@ public class Nightmode {
             seekbar_progress_drawable = mainActivity.getResources().getDrawable(R.drawable.seekbar_progressbar_nightmode);
 
             twoWayViewSliders.setBackgroundResource(R.color.colorBackgroundNightLight);
-            llSidebar.setBackgroundResource(R.color.colorBackgroundNightLight);
-            serverCount.setBackgroundResource(R.color.colorBackgroundSecondaryNight);
-            tvServerCount.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+            llSidebar.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
+            twoWayViewServers.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
             tvPullDown.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
-            mainActivity.serverListFragment.listViewServers.setBackgroundResource(R.color.colorBackgroundNightLight);
         }
         else{
             master_icon_res_id = R.mipmap.audio_icon;
@@ -56,13 +53,11 @@ public class Nightmode {
             expand_right_icon_res_id = R.mipmap.expand_right_icon;
             seekbar_progress_drawable = mainActivity.getResources().getDrawable(R.drawable.seekbar_progressbar);
 
-            serverCount.setBackgroundResource(R.color.colorBackgroundSecondary);
             tvPullDown.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
-            tvServerCount.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
-            llSidebar.setBackgroundResource(R.color.colorBackgroundSidebar);
+            llSidebar.setBackgroundResource(R.color.colorExpandSidebarButton);
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButton);
+            twoWayViewServers.setBackgroundResource(R.color.colorExpandSidebarButton);
             twoWayViewSliders.setBackgroundResource(R.color.colorBackgroundSecondary);
-            mainActivity.serverListFragment.listViewServers.setBackgroundResource(R.color.colorBackgroundSecondary);
         }
 
         imgPullDown.setImageResource(pull_down_icon_res_id);

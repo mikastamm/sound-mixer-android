@@ -99,7 +99,6 @@ public class SettingsManager {
             else if(key.equals("pref_key_nightmode"))
             {
                 Settings.nightmode = preferences.getBoolean(key, false);
-                Nightmode.setEnabled(MainActivity.Instance, Settings.nightmode);
             }
             else if(key.equals("pref_key_auto_connect_last"))
             {

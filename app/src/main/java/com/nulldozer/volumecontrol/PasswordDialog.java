@@ -47,9 +47,10 @@ public class PasswordDialog extends DialogFragment {
             public void onClick(View v) {
                 SharedPreferences.Editor prefEditor = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE).edit();
                 server.standardPassword = editTextPassword.getText().toString();
-                prefEditor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(server.RSAPublicKey), server.standardPassword);
+                prefEditor.putString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(server.RSAPublicKey), server.standardPassword);
                 prefEditor.apply();
                 MainActivity.Instance.serverListViewAdapter.setActive(server);
+                dismiss();
             }
         });
 

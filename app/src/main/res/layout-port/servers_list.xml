@@ -15,17 +15,6 @@
             android:layout_gravity="center"
             android:background="#00ffffff"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:orientation="vertical">
-
-            <View
-                android:layout_width="2px"
-                android:layout_height="fill_parent"
-                android:background="#95A5A6"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"/>
 
             <FrameLayout
                 android:id="@+id/serverCountWrapper"
@@ -44,14 +33,6 @@
                     />
             </FrameLayout>
 
-            <View
-                android:layout_width="2px"
-                android:layout_height="wrap_content"
-                android:background="#95A5A6"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"/>
-
-        </LinearLayout>
 
         <Button
             android:id="@+id/btnResearchServers"
@@ -64,7 +45,8 @@
 
         <FrameLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="-10dp">
 
             <RelativeLayout
                 android:id="@+id/llPullToRefresh"
@@ -108,8 +90,6 @@
                     android:layout_height="wrap_content"
                     android:clickable="true"
                     android:longClickable="true"/>
-
-
             </android.support.v4.widget.SwipeRefreshLayout>
         </FrameLayout>
     </LinearLayout>

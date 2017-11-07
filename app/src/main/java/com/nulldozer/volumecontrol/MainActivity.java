@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
         clientFragment = getClientFragment();
         if(!fragmentRetained)
             new NetworkDiscoveryThread().start();
+        else
+            new NetworkDiscoveryThread(true).start();
 
         broadcastReceiver = new BroadcastReceiverThread();
         broadcastReceiver.start();
@@ -116,21 +118,19 @@ public class MainActivity extends AppCompatActivity {
 
         //Show the Rate Us prompt if conditions are met
         final SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        if(prefs.getBoolean(PrefKeys.FirstConnectHappened_PrefKey, false) && !fragmentRetained)
+        if(prefs.getBoolean(PrefKeys.FirstConnectHappened, false) && !fragmentRetained)
         {
             new RatePrompt(this).tryShow();
         }
 
         //Show the Install instructions if conditions are met
-        if(prefs.getBoolean(PrefKeys.ShowInstallInstructionsOnStart_PrefKey, true))
+        if(prefs.getBoolean(PrefKeys.ShowInstallInstructionsOnStart, true))
         {
            showInstructionsDialog();
         }
 
-        Nightmode.setEnabled(this, Settings.nightmode);
         settingsManager = new SettingsManager();
         orientationManager = new OrientationManager(this);
-        sidebarController = new SidebarController(this, orientationManager.isLandscape);
 
         Button btnTryAgain = (Button)findViewById(R.id.btnTryAgain);
         btnTryAgain.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +152,10 @@ public class MainActivity extends AppCompatActivity {
             serverListFragment.listViewServers.setOrientation(TwoWayView.Orientation.HORIZONTAL);
             expandImg.setRotation(90);
         }
+
+
+        sidebarController = new SidebarController(this, orientationManager.isLandscape);
+        Nightmode.setEnabled(this, Settings.nightmode);
 
         if(savedInstanceState != null)
         {
@@ -181,12 +185,10 @@ public class MainActivity extends AppCompatActivity {
             if(fragment != null)
             {
                 serverListViewAdapter.activeServer = fragment.clientThread.activeServer;
-                serverListViewAdapter.activeServer.active = true;
+                    serverListViewAdapter.activeServer.active = true;
 
                 serverListViewAdapter.notifyDataSetChanged();
                 new Thread(fragment.clientThread.requestAllAudioSessionsFromServer).start();
-                LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
-                //llConnectionTip.setVisibility(View.GONE);
                 fragmentRetained = true;
                 return fragment;
             }
@@ -209,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
 
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(PrefKeys.ShowInstallInstructionsOnStart_PrefKey, false);
+        editor.putBoolean(PrefKeys.ShowInstallInstructionsOnStart, false);
         editor.apply();
     }
 

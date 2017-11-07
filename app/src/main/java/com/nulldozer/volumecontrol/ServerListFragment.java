@@ -57,7 +57,7 @@ public class ServerListFragment extends Fragment {
                 } else if (selectedServer.hasPassword && selectedServer.standardPassword.equals("")) {
                     final SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
                     Log.i("MainActivity", "Selected server requires authentification, showing Password Dialog");
-                    Log.i(TAG, "Saved Password:" + prefs.getString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(selectedServer.RSAPublicKey), ""));
+                    Log.i(TAG, "Saved Password:" + prefs.getString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(selectedServer.RSAPublicKey), ""));
 
                     PasswordDialog pwDialog = new PasswordDialog();
                     pwDialog.setServer(selectedServer);
@@ -84,18 +84,16 @@ public class ServerListFragment extends Fragment {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getTitle().equals(getString(R.string.server_menu_forget))) {
                             SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE).edit();
-                            editor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey + VCCryptography.getMD5Hash(MainActivity.Instance.serverListViewAdapter.listElements.get(pos).RSAPublicKey), "");
+                            editor.putString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(MainActivity.Instance.serverListViewAdapter.listElements.get(pos).RSAPublicKey), "");
                             MainActivity.Instance.serverListViewAdapter.listElements.get(pos).standardPassword = "";
                             editor.apply();
 
                             Log.i(TAG, "Forgot password for " + MainActivity.Instance.serverListViewAdapter.listElements.get(pos).name);
                         } else if (item.getTitle().equals(getString(R.string.server_menu_disconnect))) {
-                            MainActivity.Instance.serverListViewAdapter.removeActive();
-                            MainActivity.Instance.listViewAdapterVolumeSliders.clear();
+                            KnownServerHelper.forget(MainActivity.Instance.serverListViewAdapter.listElements.get(pos).RSAPublicKey);
 
-                            SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                            editor.putString(PrefKeys.LastConnectedServer_PrefKey, null);
-                            editor.apply();
+                            if(MainActivity.Instance.clientFragment.clientConnection != null)
+                                MainActivity.Instance.clientFragment.clientConnection.close();
                         }
                         return true;
                     }

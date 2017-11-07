@@ -13,12 +13,12 @@ public class LaunchCounter {
     public static void launched(AppCompatActivity activity){
         SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(PrefKeys.LaunchCounterPrefKey, prefs.getInt(PrefKeys.LaunchCounterPrefKey, 0)+1);
+        editor.putInt(PrefKeys.LaunchCounter, prefs.getInt(PrefKeys.LaunchCounter, 0)+1);
         editor.apply();
     }
 
     public static int getLaunches(AppCompatActivity activity){
         SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
-        return prefs.getInt(PrefKeys.LaunchCounterPrefKey, 0);
+        return prefs.getInt(PrefKeys.LaunchCounter, 0);
     }
 }

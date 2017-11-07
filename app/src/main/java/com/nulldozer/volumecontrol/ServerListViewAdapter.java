@@ -117,22 +117,18 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         // Lookup view for data population
 
         ImageView serverIcon = (ImageView) convertView.findViewById(R.id.serverIcon);
-        ImageView lockIcon = (ImageView) convertView.findViewById(R.id.lockIcon);
         TextView serverName = (TextView) convertView.findViewById(R.id.tvServerName);
         TextView serverIP = (TextView) convertView.findViewById(R.id.tvServerIP);
-        LinearLayout llBackground = (LinearLayout)convertView.findViewById(R.id.llServerShadowWrapper);
 
         // Populate the data into the template view using the data object
         if(Settings.nightmode)
         {
-            llBackground.setBackgroundResource(R.color.colorBackgroundSecondaryNight);
-            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
-            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
+            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
         }
         else{
-            llBackground.setBackgroundResource(R.color.colorBackground);
-            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
-            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
+            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
+            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
         }
 
 
@@ -147,13 +143,6 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         serverIP.setText(vm.IPAddress);
         serverName.setText(vm.name);
 
-        if(!vm.standardPassword.equals(""))
-        {
-            lockIcon.setImageResource(R.mipmap.lock_unlocked_icon);
-        }
-        else{
-            lockIcon.setImageResource(R.mipmap.lock_icon);
-        }
 
         if(vm.active)
         {
@@ -167,14 +156,6 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
             serverIcon.setImageResource(IconResourceIDs.system_icon_res_id);
         }
 
-        if(!vm.hasPassword)
-        {
-            lockIcon.setVisibility(View.GONE);
-        }
-        else{
-            lockIcon.setVisibility(View.VISIBLE);
-
-        }
 
         // Return the completed view to render on screen
 
