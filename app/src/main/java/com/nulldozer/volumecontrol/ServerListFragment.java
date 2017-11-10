@@ -92,8 +92,8 @@ public class ServerListFragment extends Fragment {
                         } else if (item.getTitle().equals(getString(R.string.server_menu_disconnect))) {
                             KnownServerHelper.forget(MainActivity.Instance.serverListViewAdapter.listElements.get(pos).RSAPublicKey);
 
-                            if(MainActivity.Instance.clientFragment.clientConnection != null)
-                                MainActivity.Instance.clientFragment.clientConnection.close();
+                            if(MainActivity.Instance.clientFragment.clientThread != null)
+                                MainActivity.Instance.clientFragment.clientThread.close();
                         }
                         return true;
                     }

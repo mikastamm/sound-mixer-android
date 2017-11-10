@@ -22,7 +22,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.leakcanary.RefWatcher;
 
 import org.lucasr.twowayview.*;
 
@@ -75,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         fullscreen = new Fullscreen(this);
         if(Settings.useFullscreen)
@@ -88,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
         VCCryptography.generateRSAKeyPair(false);
 
         fragmentManager = getFragmentManager();
+
+        RefWatcher refWatcher = SoundMixerApplication.getRefWatcher(this);
+        refWatcher.watch(this);
 
         //Add the Actionbar and hide it
         android.support.v7.app.ActionBar supActionBar;

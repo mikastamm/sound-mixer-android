@@ -90,14 +90,9 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/builds" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/check-manifest" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes-jar" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/debug" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-classes" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-runtime-classes" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-safeguard" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-verifier" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-resources" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-support" />
@@ -105,11 +100,9 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/lint" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/pre-dexed" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/prebuild" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/reload-dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/restart-dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/shaders" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/split-apk" />
@@ -146,11 +139,15 @@
     <orderEntry type="library" name="com.google.code.gson:gson:2.2.4@jar" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-gass-license-11.4.2" level="project" />
     <orderEntry type="library" name="com.android.support:appcompat-v7-25.3.1" level="project" />
+    <orderEntry type="library" name="com.squareup.haha:haha:2.0.3@jar" level="project" />
     <orderEntry type="library" name="org.lucasr.twowayview:twowayview-0.1.1" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-ads-lite-11.4.2" level="project" />
     <orderEntry type="library" name="com.mopub.volley:mopub-volley:1.1.0@jar" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-android-1.5.4" level="project" />
     <orderEntry type="library" name="com.android.support:support-vector-drawable-25.3.1" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-analyzer-1.5.4" level="project" />
     <orderEntry type="library" name="com.android.support:support-annotations:25.3.1@jar" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-gass-11.4.2" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-watcher:1.5.4@jar" level="project" />
   </component>
 </module>

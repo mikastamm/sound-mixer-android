@@ -249,7 +249,7 @@ public class ClientThread{
                             }
                             else if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
                                 SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                                editor.putString(PrefKeys.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
+                                editor.putString(PrefKeys.LastConnectedServer, activeServer.RSAPublicKey);
                                 editor.apply();
 
                                 String vDataJson = msg.substring(3);
@@ -386,7 +386,7 @@ public class ClientThread{
 
                                 SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
+                                editor.putString(PrefKeys.ServerStandardPasswordPrefix+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
                                 editor.apply();
 
                                 MainActivity.Instance.runOnUiThread(new Runnable() {

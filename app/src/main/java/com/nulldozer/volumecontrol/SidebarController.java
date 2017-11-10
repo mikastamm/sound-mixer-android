@@ -18,19 +18,22 @@ import android.widget.PopupMenu;
  * Created by Mika on 02.11.2017.
  */
 
-public class SidebarController {
+class SidebarController {
 
-    public boolean sideBarExpanded = false;
+    boolean sideBarExpanded = false;
+
+    private static final int SIDEBAR_OPEN_DURATION = 250;
+    private static final int SIDEBAR_CLOSE_DURATION = 250;
+    private static final int SIDEBAR_LISTENER_CLEAR_PADDING = 20;
 
     private AppCompatActivity activity;
     private boolean isLandscape;
 
-    public SidebarController(final AppCompatActivity activity, boolean isLandscapeOrientation){
+    SidebarController(final AppCompatActivity activity, boolean isLandscapeOrientation){
         this.activity = activity;
         this.isLandscape = isLandscapeOrientation;
 
         final ImageButton btnExpand = (ImageButton) activity.findViewById(R.id.btnExpand);
-        final LinearLayout sideBarContentLL = (LinearLayout) activity.findViewById(R.id.sideBarContentLL);
         final ImageButton btnPupupMenu = (ImageButton) activity.findViewById(R.id.imgBtnPopupMenuMain);
         btnPupupMenu.setFocusable(false);
 
@@ -138,147 +141,99 @@ public class SidebarController {
         });
     }
 
-    public void toggleSidebar(){
-        final ImageButton btnExpand = (ImageButton) activity.findViewById(R.id.btnExpand);
+    void toggleSidebar(){
         final ImageView expandImg = (ImageView) activity.findViewById(R.id.expandImg);
         final LinearLayout sideBarContentLL = (LinearLayout) activity.findViewById(R.id.sideBarContentLL);
 
-        if(isLandscape) {
-            if (sideBarExpanded) {
-                //   btnExpand.setImageResource(R.mipmap.expand_right_icon);
+        int targetRotation;
+        int targetDimension;
+        int animDuration;
 
-                ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), 0);
-                Easing easing = new Easing(350);
-                rotate.setEvaluator(easing);
-                rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float rotVal = (float) valueAnimator.getAnimatedValue();
-                        expandImg.setRotation(rotVal);
-                    }
-                });
-                rotate.setDuration(350);
-                rotate.start();
-
-                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredWidth(), 0);
-
-                anim.setEvaluator(easing);
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = sideBarContentLL.getLayoutParams();
-                        layoutParams.width = val;
-                        sideBarContentLL.setLayoutParams(layoutParams);
-                    }
-                });
-                anim.setDuration(350);
-                anim.start();
-
-                //  sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
-                sideBarExpanded = false;
-            } else {
-                //   btnExpand.setImageResource(R.mipmap.collapse_left_icon);
-
-                ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), 180);
-                Easing easing = new Easing(250);
-                rotate.setEvaluator(easing);
-                rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float rotVal = (float) valueAnimator.getAnimatedValue();
-                        expandImg.setRotation(rotVal);
-                    }
-                });
-                rotate.setDuration(250);
-                rotate.start();
-
-                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredWidth(), activity.getWindowManager().getDefaultDisplay().getWidth() / 4);
-                anim.setEvaluator(easing);
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = sideBarContentLL.getLayoutParams();
-                        layoutParams.width = val;
-                        sideBarContentLL.setLayoutParams(layoutParams);
-                    }
-                });
-                anim.setDuration(250);
-                anim.start();
-
-                //    sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.MATCH_PARENT));
-                sideBarExpanded = true;
-            }
+        if(isLandscape && sideBarExpanded)
+        {
+            targetRotation = 0;
+            targetDimension = 0;
+            animDuration = SIDEBAR_CLOSE_DURATION;
+        }
+        else if(isLandscape && !sideBarExpanded)
+        {
+            targetRotation = 180;
+            targetDimension = activity.getWindowManager().getDefaultDisplay().getWidth() / 4;
+            animDuration = SIDEBAR_OPEN_DURATION;
+        }
+        else if(!isLandscape && sideBarExpanded)
+        {
+            targetRotation = 90;
+            targetDimension = 0;
+            animDuration = SIDEBAR_CLOSE_DURATION;
         }
         else
         {
-            if (sideBarExpanded) {
-                //   btnExpand.setImageResource(R.mipmap.expand_right_icon);
-
-                ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), 90);
-                Easing easing = new Easing(250);
-                rotate.setEvaluator(easing);
-                rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float rotVal = (float) valueAnimator.getAnimatedValue();
-                        expandImg.setRotation(rotVal);
-                    }
-                });
-                rotate.setDuration(250);
-                rotate.start();
-
-                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredHeight(), 0);
-
-                anim.setEvaluator(easing);
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = sideBarContentLL.getLayoutParams();
-                        layoutParams.height = val;
-                        sideBarContentLL.setLayoutParams(layoutParams);
-                    }
-                });
-                anim.setDuration(250);
-                anim.start();
-
-                //  sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
-                sideBarExpanded = false;
-            } else {
-                //   btnExpand.setImageResource(R.mipmap.collapse_left_icon);
-
-                ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), 270);
-                Easing easing = new Easing(250);
-                rotate.setEvaluator(easing);
-                rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        float rotVal = (float) valueAnimator.getAnimatedValue();
-                        expandImg.setRotation(rotVal);
-                    }
-                });
-                rotate.setDuration(250);
-                rotate.start();
-
-                ValueAnimator anim = ValueAnimator.ofInt(sideBarContentLL.getMeasuredHeight(), activity.getWindowManager().getDefaultDisplay().getHeight() / 6);
-                anim.setEvaluator(easing);
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        int val = (Integer) valueAnimator.getAnimatedValue();
-                        ViewGroup.LayoutParams layoutParams = sideBarContentLL.getLayoutParams();
-                        layoutParams.height = val;
-                        sideBarContentLL.setLayoutParams(layoutParams);
-                    }
-                });
-                anim.setDuration(250);
-                anim.start();
-
-                //    sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.MATCH_PARENT));
-                sideBarExpanded = true;
-            }
+            targetRotation = 270;
+            targetDimension = activity.getWindowManager().getDefaultDisplay().getHeight() / 6;
+            animDuration = SIDEBAR_OPEN_DURATION;
         }
+
+        final ValueAnimator rotate = ValueAnimator.ofFloat(expandImg.getRotation(), targetRotation);
+        Easing easing = new Easing(animDuration);
+        rotate.setEvaluator(easing);
+        rotate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float rotVal = (float) valueAnimator.getAnimatedValue();
+                expandImg.setRotation(rotVal);
+            }
+        });
+        rotate.setDuration(animDuration);
+        rotate.start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(SIDEBAR_CLOSE_DURATION + SIDEBAR_LISTENER_CLEAR_PADDING);
+                }
+                catch (InterruptedException ignored){}
+                finally {
+                    rotate.removeAllUpdateListeners();
+                }
+            }
+        }).start();
+
+        final ValueAnimator anim = ValueAnimator.ofInt( (isLandscape ? sideBarContentLL.getMeasuredWidth() : sideBarContentLL.getMeasuredHeight()), targetDimension);
+        anim.setEvaluator(easing);
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                int val = (Integer) valueAnimator.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = sideBarContentLL.getLayoutParams();
+
+                if(isLandscape)
+                    layoutParams.width = val;
+                else
+                    layoutParams.height = val;
+
+                sideBarContentLL.setLayoutParams(layoutParams);
+            }
+        });
+        anim.setDuration(animDuration);
+        anim.start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(SIDEBAR_CLOSE_DURATION + SIDEBAR_LISTENER_CLEAR_PADDING);
+                }
+                catch (InterruptedException ignored){}
+                finally {
+                    anim.removeAllUpdateListeners();
+                }
+            }
+        }).start();
+
+        //  sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
+        sideBarExpanded = !sideBarExpanded;
     }
+
 }

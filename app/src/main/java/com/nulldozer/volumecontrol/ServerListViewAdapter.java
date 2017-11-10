@@ -123,12 +123,12 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         // Populate the data into the template view using the data object
         if(Settings.nightmode)
         {
-            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
-            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
+            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
         }
         else{
-            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
-            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
+            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
+            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
         }
 
 
