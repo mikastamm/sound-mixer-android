@@ -13,8 +13,10 @@ import android.widget.ImageView;
 public class ServerRefreshByUser {
     public SwipeRefreshLayout swipeContainer;
     public View refreshServersTip;
+    private final MainActivity mainActivity;
 
-    public ServerRefreshByUser(AppCompatActivity activity){
+    public ServerRefreshByUser(MainActivity activity){
+        mainActivity = activity;
         if(Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
         {
             refreshServersTip = activity.findViewById(R.id.llPullToRefresh);
@@ -31,7 +33,7 @@ public class ServerRefreshByUser {
             swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    new NetworkDiscoveryThread().start();
+                    new NetworkDiscoveryThread(mainActivity).start();
                 }
             });
             
@@ -49,7 +51,7 @@ public class ServerRefreshByUser {
             refreshServersTip.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new NetworkDiscoveryThread().start();
+                    new NetworkDiscoveryThread(mainActivity).start();
                     refreshServersTip.setEnabled(false);
                 }
             });

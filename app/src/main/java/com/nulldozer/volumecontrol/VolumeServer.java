@@ -19,8 +19,6 @@ public class VolumeServer {
     public String standardPassword;
     public String RSAPublicKey;
 
-    public boolean active;
-
     public VolumeServer(boolean hasPassword, String name, String IPAddress, String standardPassword)
     {
         this.name = name;

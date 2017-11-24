@@ -11,6 +11,13 @@ public class ClientFragment extends Fragment {
     public ClientThread clientThread;
 
     @Override
+    public void onSaveInstanceState (Bundle outState)
+    {
+        clientThread.mainActivity = null;
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // retain this fragment

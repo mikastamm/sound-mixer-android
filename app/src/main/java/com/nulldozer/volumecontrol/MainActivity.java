@@ -25,7 +25,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.leakcanary.RefWatcher;
 
 import org.lucasr.twowayview.*;
 
@@ -47,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     TwoWayView listViewVolumeSliders;
 
-    public static MainActivity Instance;
     public ClientFragment clientFragment;
 
     boolean passwordDialogOpen = false;
@@ -81,6 +79,11 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy(){
         super.onDestroy();
 
+        if(broadcastReceiver != null)
+            broadcastReceiver.close();
+
+        if(listViewAdapterVolumeSliders != null)
+            listViewAdapterVolumeSliders.close();
     }
 
     @Override
@@ -92,14 +95,10 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Instance = this;
         LaunchCounter.launched(this);
-        VCCryptography.generateRSAKeyPair(false);
+        VCCryptography.generateRSAKeyPair(false, this);
 
         fragmentManager = getFragmentManager();
-
-        RefWatcher refWatcher = SoundMixerApplication.getRefWatcher(this);
-        refWatcher.watch(this);
 
         //Add the Actionbar and hide it
         android.support.v7.app.ActionBar supActionBar;
@@ -114,19 +113,19 @@ public class MainActivity extends AppCompatActivity {
         listViewVolumeSliders.setAdapter(listViewAdapterVolumeSliders);
 
         serverListFragment = (ServerListFragment)getSupportFragmentManager().findFragmentById(R.id.fragmentServerList);
-        serverListFragment.initialize();
+        serverListFragment.initialize(this);
 
         clientFragment = getClientFragment();
         if(!fragmentRetained)
-            new NetworkDiscoveryThread().start();
+            new NetworkDiscoveryThread(this).start();
         else
-            new NetworkDiscoveryThread(true).start();
+            new NetworkDiscoveryThread(true, this).start();
 
         broadcastReceiver = new BroadcastReceiverThread();
-        broadcastReceiver.start();
+        broadcastReceiver.start(this);
 
         serverRefreshByUser = new ServerRefreshByUser(this);
-        networkEventHandlers = new NetworkEventHandlers(listViewAdapterVolumeSliders, serverListViewAdapter);
+        networkEventHandlers = new NetworkEventHandlers(this, listViewAdapterVolumeSliders, serverListViewAdapter);
 
         //Show the Rate Us prompt if conditions are met
         final SharedPreferences prefs = getPreferences(MODE_PRIVATE);
@@ -141,14 +140,16 @@ public class MainActivity extends AppCompatActivity {
            showInstructionsDialog();
         }
 
-        settingsManager = new SettingsManager();
+        settingsManager = new SettingsManager(this);
         orientationManager = new OrientationManager(this);
 
         Button btnTryAgain = (Button)findViewById(R.id.btnTryAgain);
+
+        final MainActivity finalThis = this;
         btnTryAgain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new NetworkDiscoveryThread().start();
+                new NetworkDiscoveryThread(finalThis).start();
             }
         });
 
@@ -196,8 +197,9 @@ public class MainActivity extends AppCompatActivity {
 
             if(fragment != null)
             {
+                fragment.clientThread.mainActivity = this;
+
                 serverListViewAdapter.activeServer = fragment.clientThread.activeServer;
-                    serverListViewAdapter.activeServer.active = true;
 
                 serverListViewAdapter.notifyDataSetChanged();
                 new Thread(fragment.clientThread.requestAllAudioSessionsFromServer).start();
@@ -207,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         }
         fragmentRetained = false;
         fragment = new ClientFragment();
-        fragment.clientThread = new ClientThread();
+        fragment.clientThread = new ClientThread(this);
         if(fragmentManager != null)
         {
             fragmentManager.beginTransaction().add(fragment, TagClientFragment).commit();
@@ -217,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showInstructionsDialog(){
         final SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        final Dialog dialog = new Dialog(MainActivity.Instance);
+        final Dialog dialog = new Dialog(this);
         dialog.setTitle("How to use");
         dialog.setContentView(R.layout.how_to_use_dialog);
         dialog.show();

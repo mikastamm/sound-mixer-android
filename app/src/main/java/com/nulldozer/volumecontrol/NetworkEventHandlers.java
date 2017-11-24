@@ -18,73 +18,75 @@ public class NetworkEventHandlers {
 
     private static String TAG = "NetworkEventHandlers";
 
-    public ListViewAdapter seekbarAdapter;
-    public ServerListViewAdapter serverListViewAdapter;
-
-    public NetworkEventHandlers(ListViewAdapter seekbarAdapter, ServerListViewAdapter serverListViewAdapter)
+    private ListViewAdapter seekbarAdapter;
+    private ServerListViewAdapter serverListViewAdapter;
+    private MainActivity mainActivity;
+    
+    public NetworkEventHandlers(MainActivity mainActivity, ListViewAdapter seekbarAdapter, ServerListViewAdapter serverListViewAdapter)
     {
+        this.mainActivity = mainActivity;
         this.seekbarAdapter = seekbarAdapter;
         this.serverListViewAdapter = serverListViewAdapter;
     }
 
     public void onServerDisconnected(){
-        if(MainActivity.Instance.serverListViewAdapter.listElements.size() == 0)
-        new NetworkDiscoveryThread().start();
+        if(mainActivity.serverListViewAdapter.listElements.size() == 0)
+        new NetworkDiscoveryThread(mainActivity).start();
     }
 
     public void onNetworkDiscoveryStarted(boolean silent){
-        TextView serverCountTextView = ((TextView) MainActivity.Instance.findViewById(R.id.tvServerCount));
+        TextView serverCountTextView = ((TextView) mainActivity.findViewById(R.id.tvServerCount));
 
         if (!silent && Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
-            MainActivity.Instance.serverRefreshByUser.swipeContainer.setRefreshing(true);
+            mainActivity.serverRefreshByUser.swipeContainer.setRefreshing(true);
 
         serverCountTextView.setText("0 Servers");
 
-        if(MainActivity.Instance.serverListViewAdapter.activeServer == null) {
-            ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        if(mainActivity.serverListViewAdapter.activeServer == null) {
+            ProgressBar pbConnecting = (ProgressBar) mainActivity.findViewById(R.id.pbConnecting);
             pbConnecting.setVisibility(View.GONE);
         }
 
-        if(MainActivity.Instance.serverListViewAdapter.activeServer == null) {
-            LinearLayout llConnectionTip = (LinearLayout) MainActivity.Instance.findViewById(R.id.llConnectionTip);
+        if(mainActivity.serverListViewAdapter.activeServer == null) {
+            LinearLayout llConnectionTip = (LinearLayout) mainActivity.findViewById(R.id.llConnectionTip);
             llConnectionTip.setVisibility(View.GONE);
         }
     }
 
     public void onNetworkDiscoveryFinished(){
-        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        ProgressBar pbConnecting = (ProgressBar) mainActivity.findViewById(R.id.pbConnecting);
         pbConnecting.setVisibility(View.GONE);
 
         if(serverListViewAdapter.listElements.size() == 0) {
-            LinearLayout llConnectionTip = (LinearLayout) MainActivity.Instance.findViewById(R.id.llConnectionTip);
+            LinearLayout llConnectionTip = (LinearLayout) mainActivity.findViewById(R.id.llConnectionTip);
             llConnectionTip.setVisibility(View.VISIBLE);
         }
 
         if (Build.VERSION.SDK_INT >= 19 && !Settings.useAlternativeServerRefresh)
-            MainActivity.Instance.serverRefreshByUser.swipeContainer.setRefreshing(false);
+            mainActivity.serverRefreshByUser.swipeContainer.setRefreshing(false);
 
         if(serverListViewAdapter.listElements.size() == 0)
         {
             if(Build.VERSION.SDK_INT < 19 || Settings.useAlternativeServerRefresh)
-                MainActivity.Instance.serverRefreshByUser.refreshServersTip.setEnabled(true);
+                mainActivity.serverRefreshByUser.refreshServersTip.setEnabled(true);
 
-            MainActivity.Instance.serverRefreshByUser.refreshServersTip.setVisibility(View.VISIBLE);
+            mainActivity.serverRefreshByUser.refreshServersTip.setVisibility(View.VISIBLE);
 
-            if(!MainActivity.Instance.sidebarController.sideBarExpanded && !MainActivity.Instance.fragmentRetained)
-                MainActivity.Instance.sidebarController.toggleSidebar();
+            if(!mainActivity.sidebarController.sideBarExpanded && !mainActivity.fragmentRetained)
+                mainActivity.sidebarController.toggleSidebar();
         }
 
-        if(serverListViewAdapter.activeServer == null && !MainActivity.Instance.sidebarController.sideBarExpanded)
-            MainActivity.Instance.sidebarController.toggleSidebar();
+        if(serverListViewAdapter.activeServer == null && !mainActivity.sidebarController.sideBarExpanded)
+            mainActivity.sidebarController.toggleSidebar();
     }
 
     public void onServerDiscovered(final VolumeServer server){
         Log.i(TAG, "Found Server:" + server.toString());
 
-        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
+        LinearLayout llConnectionTip = (LinearLayout)mainActivity.findViewById(R.id.llConnectionTip);
         llConnectionTip.setVisibility(View.GONE);
 
-        final SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
+        final SharedPreferences prefs = mainActivity.getPreferences(MainActivity.MODE_PRIVATE);
         server.standardPassword = prefs.getString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(server.RSAPublicKey), "");
 
         if(server.IPAddress.contains(":"))
@@ -106,52 +108,54 @@ public class NetworkEventHandlers {
         }
         serverListViewAdapter.notifyDataSetChanged();
 
-        TextView serverCountTextView = ((TextView)MainActivity.Instance.findViewById(R.id.tvServerCount));
+        TextView serverCountTextView = ((TextView)mainActivity.findViewById(R.id.tvServerCount));
         serverCountTextView.setText(serverListViewAdapter.getCount() + (serverListViewAdapter.getCount() == 1 ? " Server" : " Servers"));
 
-        MainActivity.Instance.serverRefreshByUser.refreshServersTip.setVisibility(View.GONE);
+        mainActivity.serverRefreshByUser.refreshServersTip.setVisibility(View.GONE);
 
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(PrefKeys.FirstConnectHappened, true);
         editor.apply();
 
         //Connect to the found Server if not connected and allowed in settings
-        if(MainActivity.Instance.serverListViewAdapter.activeServer == null)
+        if(mainActivity.serverListViewAdapter.activeServer == null)
         {
             VolumeServer passwordLessServer;
 
-            if(Settings.autoConnectToLastConnectedServer && KnownServerHelper.isKnown(server.RSAPublicKey)){
-                MainActivity.Instance.serverListViewAdapter.setActive(server);
+            if(Settings.autoConnectToLastConnectedServer && KnownServerHelper.isKnown(server.RSAPublicKey, mainActivity)){
+                mainActivity.serverListViewAdapter.setActive(server);
             }
-            else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = MainActivity.Instance.serverListViewAdapter.getPasswordlessServer()) != null)
+            else if(Settings.autoConnectToServersWithoutPassword && (passwordLessServer = mainActivity.serverListViewAdapter.getPasswordlessServer()) != null)
             {
-                MainActivity.Instance.serverListViewAdapter.setActive(passwordLessServer);
+                mainActivity.serverListViewAdapter.setActive(passwordLessServer);
             }
 
         }
     }
 
     public void onConnectionInitiated(VolumeServer target){
-        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        ProgressBar pbConnecting = (ProgressBar) mainActivity.findViewById(R.id.pbConnecting);
         pbConnecting.setVisibility(View.VISIBLE);
     }
 
     public void onAudioSessionListReceived(VolumeServer target, VolumeData[] audioSessions)
     {
-        ProgressBar pbConnecting = (ProgressBar) MainActivity.Instance.findViewById(R.id.pbConnecting);
+        KnownServerHelper.addToKnown(target.RSAPublicKey, mainActivity);
+
+        ProgressBar pbConnecting = (ProgressBar) mainActivity.findViewById(R.id.pbConnecting);
         pbConnecting.setVisibility(View.GONE);
 
-        LinearLayout llConnectionTip = (LinearLayout)MainActivity.Instance.findViewById(R.id.llConnectionTip);
+        LinearLayout llConnectionTip = (LinearLayout)mainActivity.findViewById(R.id.llConnectionTip);
         llConnectionTip.setVisibility(View.GONE);
 
-        if (!MainActivity.Instance.fragmentRetained)
-            Toast.makeText(MainActivity.Instance, "Connected to " + target.name, Toast.LENGTH_SHORT).show();
+        if (!mainActivity.fragmentRetained)
+            Toast.makeText(mainActivity, "Connected to " + target.name, Toast.LENGTH_SHORT).show();
 
         //Fill the listViewVolumeSliders with the received data
-        MainActivity.Instance.listViewAdapterVolumeSliders.clear();
-        MainActivity.Instance.listViewAdapterVolumeSliders.addAll(audioSessions);
+        mainActivity.listViewAdapterVolumeSliders.clear();
+        mainActivity.listViewAdapterVolumeSliders.addAll(audioSessions);
 
-        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
         for (int i = 0; i < seekbarAdapter.listElements.size(); i++) {
             VolumeData vm = seekbarAdapter.listElements.get(i);
             if (vm.title.equals("Master")) //TODO: Use multilanguage title

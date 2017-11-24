@@ -111,8 +111,8 @@ public class VCCryptography {
         return JSONManager.serialize(pKey);
     }
 
-    public static void generateRSAKeyPair(boolean ignoreGenerated){
-        SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
+    public static void generateRSAKeyPair(boolean ignoreGenerated, MainActivity mainActivity){
+        SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         try {
             if(ignoreGenerated || (prefs.getString(PrefKeys.RSAPrivateKey, null) == null && prefs.getString(PrefKeys.RSAPublicKey, null) == null))
             {

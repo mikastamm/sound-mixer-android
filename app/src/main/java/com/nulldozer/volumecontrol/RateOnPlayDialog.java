@@ -15,10 +15,17 @@ import android.widget.Button;
  */
 
 public class RateOnPlayDialog extends DialogFragment {
+    private MainActivity mainActivity;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.rate_on_play_dialog, container);
+    }
+
+    public void setMainActivity(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
     }
 
     @Override
@@ -38,7 +45,7 @@ public class RateOnPlayDialog extends DialogFragment {
         btnOkay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String appPackageName = MainActivity.Instance.getPackageName(); // getPackageName() from Context or Activity object
+                final String appPackageName = mainActivity.getPackageName(); // getPackageName() from Context or Activity object
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
                 } catch (android.content.ActivityNotFoundException anfe) {

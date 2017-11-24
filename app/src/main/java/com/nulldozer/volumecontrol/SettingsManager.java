@@ -12,6 +12,8 @@ import java.util.Map;
 public class SettingsManager {
     SharedPreferences preferences;
     private static final String TAG = "PreferenceManager";
+    private MainActivity mainActivity;
+    
     public SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -20,25 +22,25 @@ public class SettingsManager {
             {
                 Settings.showServerIpInServerBrowser = sharedPreferences.getBoolean(key, false);
                 Log.i(TAG, "ShowServerIPs: " + Settings.showServerIpInServerBrowser);
-                MainActivity.Instance.serverListViewAdapter.notifyDataSetChanged();
+                mainActivity.serverListViewAdapter.notifyDataSetChanged();
             }
             else if(key.equals("pref_key_fullscreen"))
             {
                 Settings.useFullscreen = sharedPreferences.getBoolean(key, false);
                 if(!Settings.useFullscreen)
                 {
-                    MainActivity.Instance.fullscreen.disable();
+                    mainActivity.fullscreen.disable();
                 }
             }
             else if(key.equals("pref_key_hide_application_icon"))
             {
                 Settings.hideApplicationIcons = preferences.getBoolean(key, false);
-                MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
             }
             else if(key.equals("pref_key_nightmode"))
             {
                 Settings.nightmode = preferences.getBoolean(key, false);
-                Nightmode.setEnabled(MainActivity.Instance, Settings.nightmode);
+                Nightmode.setEnabled(mainActivity, Settings.nightmode);
             }
             else if(key.equals("pref_key_auto_connect_last"))
             {
@@ -65,14 +67,15 @@ public class SettingsManager {
                     Settings.appOrientation = Orientation.LANDSCAPE;
                 }
 
-                MainActivity.Instance.recreate();
+                mainActivity.recreate();
             }
         }
     };
 
 
-    public SettingsManager(){
-        preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.Instance);
+    public SettingsManager(MainActivity mainActivity){
+        this.mainActivity = mainActivity;
+        preferences = PreferenceManager.getDefaultSharedPreferences(mainActivity);
 
         Map<String, ?> entries = preferences.getAll();
 
@@ -83,8 +86,8 @@ public class SettingsManager {
             {
                 Settings.showServerIpInServerBrowser = preferences.getBoolean(key, false);
                 Log.i(TAG, "ShowServerIPs: " + Settings.showServerIpInServerBrowser);
-                MainActivity.Instance.serverListViewAdapter.notifyDataSetChanged();
-                MainActivity.Instance.serverListViewAdapter.notifyDataSetInvalidated();
+                mainActivity.serverListViewAdapter.notifyDataSetChanged();
+                mainActivity.serverListViewAdapter.notifyDataSetInvalidated();
             }
             else if(key.equals("pref_key_fullscreen"))
             {
@@ -93,8 +96,8 @@ public class SettingsManager {
             else if(key.equals("pref_key_hide_application_icon"))
             {
                 Settings.hideApplicationIcons = preferences.getBoolean(key, false);
-                MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                MainActivity.Instance.serverListViewAdapter.notifyDataSetInvalidated();
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                mainActivity.serverListViewAdapter.notifyDataSetInvalidated();
             }
             else if(key.equals("pref_key_nightmode"))
             {

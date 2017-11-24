@@ -15,12 +15,17 @@ import android.widget.Toast;
 public class FeedbackDialog extends DialogFragment{
 
     private FeedbackType feedbackType = FeedbackType.NEUTRAL_FEEDBACK;
+    private MainActivity mainActivity;
 
     public enum FeedbackType{
         BAD_FEEDBACK,
         NEUTRAL_FEEDBACK
     }
 
+    public void setMainActivity(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
+    }
     public void setFeedbackType(FeedbackType type){
         feedbackType = type;
     }
@@ -64,8 +69,8 @@ public class FeedbackDialog extends DialogFragment{
                 }
                 else{
                     toSend = msg + " ;User Email:" + email;
-                    new SendMailTask(MainActivity.Instance).execute("SoundMixerInAppFeedback@gmail.com", "SoundMixerApp", "feedback@nulldozer.me", "User Feedback", toSend);
-                    Toast.makeText(MainActivity.Instance, getString(R.string.thanks_for_feedback), Toast.LENGTH_LONG).show();
+                    new SendMailTask(mainActivity).execute("SoundMixerInAppFeedback@gmail.com", "SoundMixerApp", "feedback@nulldozer.me", "User Feedback", toSend);
+                    Toast.makeText(mainActivity, getString(R.string.thanks_for_feedback), Toast.LENGTH_LONG).show();
                     dismiss();
                 }
 

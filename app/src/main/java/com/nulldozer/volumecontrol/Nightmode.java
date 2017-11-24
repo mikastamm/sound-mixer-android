@@ -40,7 +40,7 @@ public class Nightmode {
             twoWayViewSliders.setBackgroundResource(R.color.colorBackgroundNightLight);
             llSidebar.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
             twoWayViewServers.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
-            tvPullDown.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+            tvPullDown.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButtonNight);
         }
         else{
@@ -53,7 +53,7 @@ public class Nightmode {
             expand_right_icon_res_id = R.mipmap.expand_right_icon;
             seekbar_progress_drawable = mainActivity.getResources().getDrawable(R.drawable.seekbar_progressbar);
 
-            tvPullDown.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
+            tvPullDown.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
             llSidebar.setBackgroundResource(R.color.colorExpandSidebarButton);
             llExpandSidebar.setBackgroundResource(R.color.colorExpandSidebarButton);
             twoWayViewServers.setBackgroundResource(R.color.colorExpandSidebarButton);

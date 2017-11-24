@@ -21,7 +21,8 @@ public class PasswordDialog extends DialogFragment {
 
     private final static String TAG = "PasswordDialog";
     private VolumeServer server;
-
+    private MainActivity mainActivity;
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -33,7 +34,11 @@ public class PasswordDialog extends DialogFragment {
     {
         this.server = server;
     }
-
+    public void setMainActivity(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
+    }
+    
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
@@ -45,11 +50,11 @@ public class PasswordDialog extends DialogFragment {
         btnOkay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences.Editor prefEditor = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE).edit();
+                SharedPreferences.Editor prefEditor = mainActivity.getPreferences(Context.MODE_PRIVATE).edit();
                 server.standardPassword = editTextPassword.getText().toString();
                 prefEditor.putString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(server.RSAPublicKey), server.standardPassword);
                 prefEditor.apply();
-                MainActivity.Instance.serverListViewAdapter.setActive(server);
+                mainActivity.serverListViewAdapter.setActive(server);
                 dismiss();
             }
         });

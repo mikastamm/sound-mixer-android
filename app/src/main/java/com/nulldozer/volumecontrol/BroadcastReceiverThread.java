@@ -19,6 +19,12 @@ public class BroadcastReceiverThread implements Runnable {
     private final static String TAG = "BroadcastReceiverThread";
     private DatagramSocket socket;
     private Thread t;
+    private MainActivity main;
+
+    public void close(){
+        socket.close();
+        main = null;
+    }
 
     @Override
     public void run(){
@@ -27,7 +33,7 @@ public class BroadcastReceiverThread implements Runnable {
             socket = new DatagramSocket(Constants.REVERSE_DISCOVERY_UDP_PORT, InetAddress.getByName("0.0.0.0"));
             socket.setBroadcast(true);
 
-            while (true) {
+            while (!socket.isClosed()) {
                 try {
                     Log.i(TAG, "Ready to receive broadcast packets!");
 
@@ -36,13 +42,16 @@ public class BroadcastReceiverThread implements Runnable {
                     DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
                     socket.receive(packet);
 
+                    if(socket.isClosed())
+                        return;
+
                     //Packet received
                     Log.i(TAG, "Packet received from: " + packet.getAddress().getHostAddress());
                     String data = new String(packet.getData()).trim();
                     Log.i(TAG, "Packet received; data: " + data);
                     if(data.equals("VCHELLO"))
                     {
-                        new NetworkDiscoveryThread(true).start();
+                        new NetworkDiscoveryThread(true, main).start();
                     }
                 }
                 catch (IOException ex)
@@ -61,7 +70,8 @@ public class BroadcastReceiverThread implements Runnable {
         }
     }
 
-    public void start(){
+    public void start(MainActivity main){
+        this.main = main;
         String threadName = "BroadCastReceiverThread";
         System.out.println("Starting " +  threadName );
 

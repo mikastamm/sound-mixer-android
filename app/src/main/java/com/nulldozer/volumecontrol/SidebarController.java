@@ -26,10 +26,10 @@ class SidebarController {
     private static final int SIDEBAR_CLOSE_DURATION = 250;
     private static final int SIDEBAR_LISTENER_CLEAR_PADDING = 20;
 
-    private AppCompatActivity activity;
+    private MainActivity activity;
     private boolean isLandscape;
 
-    SidebarController(final AppCompatActivity activity, boolean isLandscapeOrientation){
+    SidebarController(final MainActivity activity, boolean isLandscapeOrientation){
         this.activity = activity;
         this.isLandscape = isLandscapeOrientation;
 
@@ -94,7 +94,7 @@ class SidebarController {
         btnPupupMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(MainActivity.Instance, v);
+                PopupMenu popup = new PopupMenu(activity, v);
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.overflow_menu_main, popup.getMenu());
 
@@ -107,7 +107,7 @@ class SidebarController {
 
                         if(title.equals(activity.getString(R.string.main_menu_refresh)))
                         {
-                            new NetworkDiscoveryThread().start();
+                            new NetworkDiscoveryThread(activity).start();
                         }
                         else if(title.equals(activity.getString(R.string.main_menu_how_to_use)))
                         {
@@ -116,12 +116,13 @@ class SidebarController {
                         }
                         else if(title.equals(activity.getString(R.string.main_menu_settings)))
                         {
-                            Intent settingsIntent = new Intent(MainActivity.Instance, SettingsActivity.class);
+                            Intent settingsIntent = new Intent(activity, SettingsActivity.class);
                             activity.startActivity(settingsIntent);
                         }
                         else if(title.equals(activity.getString(R.string.main_menu_feedback)))
                         {
                             FeedbackDialog feedbackDialog = new FeedbackDialog();
+                            feedbackDialog.setMainActivity(activity);
                             feedbackDialog.setFeedbackType(FeedbackDialog.FeedbackType.NEUTRAL_FEEDBACK);
                             feedbackDialog.show(activity.getSupportFragmentManager(), "menu-feedback-dialog");
                         }

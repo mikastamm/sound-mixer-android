@@ -21,11 +21,13 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
     ArrayList<VolumeServer> listElements;
     VolumeServer activeServer;
-
+    MainActivity mainActivity;
+    
     final String TAG = "ServerListViewAdapter";
 
-    public ServerListViewAdapter(Context context, ArrayList<VolumeServer> users) {
+    public ServerListViewAdapter(MainActivity context, ArrayList<VolumeServer> users) {
         super(context, 0, users);
+        mainActivity = context;
         listElements = users;
     }
 
@@ -45,11 +47,8 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
     }
 
     public void removeActive(){
-        if(MainActivity.Instance.clientFragment.clientThread != null)
-        MainActivity.Instance.clientFragment.clientThread.listenerThread.interrupt();
-        
-        if(activeServer != null)
-        activeServer.active = false;
+        if(mainActivity.clientFragment.clientThread != null)
+        mainActivity.clientFragment.clientThread.listenerThread.interrupt();
 
         activeServer = null;
         notifyDataSetChanged();
@@ -71,19 +70,23 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
     public void setActive(VolumeServer newActive){
 
-        if (activeServer != null) {
-            activeServer.active = false;
+        boolean found = false;
+        for(int i = 0; i < listElements.size(); i++)
+        {
+            if(listElements.get(i).RSAPublicKey.equals(newActive.RSAPublicKey))
+                found = true;
         }
 
-        if(newActive != null) {
-            newActive.active = true;
+        if(!found)
+            listElements.add(newActive);
 
-            if(MainActivity.Instance.clientFragment.clientThread != null)
-                MainActivity.Instance.clientFragment.clientThread.close();
+        if(newActive != null) {
+            if(mainActivity.clientFragment.clientThread != null)
+                mainActivity.clientFragment.clientThread.close();
 
             activeServer = newActive;
 
-            MainActivity.Instance.clientFragment.clientThread = new ClientThread();
+            mainActivity.clientFragment.clientThread = new ClientThread(mainActivity);
         }
         else{
             if(listElements.size() > 0)
@@ -97,7 +100,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         }
 
         notifyDataSetChanged();
-        MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
+        mainActivity.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
     }
 
     @Override
@@ -123,12 +126,12 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         // Populate the data into the template view using the data object
         if(Settings.nightmode)
         {
-            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
-            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
+            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorTextNight));
         }
         else{
-            serverName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
-            serverIP.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
+            serverName.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
+            serverIP.setTextColor(ContextCompat.getColor(mainActivity, R.color.colorText));
         }
 
 
@@ -144,7 +147,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         serverName.setText(vm.name);
 
 
-        if(vm.active)
+        if(activeServer != null && vm.RSAPublicKey.equals(activeServer.RSAPublicKey))
         {
             serverIcon.setImageResource(R.mipmap.server_active_icon);
             serverName.setTypeface(null, Typeface.BOLD);

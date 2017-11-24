@@ -16,10 +16,10 @@ public class RatePrompt {
 
     int launches;
     int prompts;
-    AppCompatActivity activity;
+    MainActivity activity;
     private SharedPreferences prefs;
 
-    public RatePrompt(AppCompatActivity activity)
+    public RatePrompt(MainActivity activity)
     {
         this.activity = activity;
         prefs = activity.getPreferences(Context.MODE_PRIVATE);
@@ -32,6 +32,7 @@ public class RatePrompt {
 
         if(prompts == 0 && launches == showAfterLaunches) {
             RateAppDialog rateDialog = new RateAppDialog();
+            rateDialog.setMainActivity(activity);
             rateDialog.show(fm, "rate-dialog");
             editor.putInt(PrefKeys.RatePromptCounter, prefs.getInt(PrefKeys.RatePromptCounter, 0)+1);
             editor.apply();

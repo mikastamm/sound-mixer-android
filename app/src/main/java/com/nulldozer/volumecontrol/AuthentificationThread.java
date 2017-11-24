@@ -41,8 +41,8 @@ public class AuthentificationThread implements Runnable{
 
     }
 
-    public String getDeviceID(){
-            return ((WifiManager) MainActivity.Instance.getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getMacAddress();
+    public String getDeviceID(MainActivity mainActivity){
+            return ((WifiManager) mainActivity.getSystemService(Context.WIFI_SERVICE)).getConnectionInfo().getMacAddress();
     }
 
 }

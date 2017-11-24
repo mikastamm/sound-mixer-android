@@ -12,9 +12,9 @@ import java.util.Set;
  */
 
 public class KnownServerHelper {
-    public static boolean isKnown(String RSAKey)
+    public static boolean isKnown(String RSAKey, MainActivity mainActivity)
     {
-        SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         Set<String> knownServers = prefs.getStringSet(PrefKeys.KnownServers, new HashSet<String>());
 
         if(knownServers.contains(RSAKey))
@@ -23,9 +23,9 @@ public class KnownServerHelper {
             return false;
     }
 
-    public static void addToKnown(String RSAKey)
+    public static void addToKnown(String RSAKey, MainActivity mainActivity)
     {
-        SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = prefs.edit();
         Set<String> knownServers = prefs.getStringSet(PrefKeys.KnownServers, new HashSet<String>());
         if(!knownServers.contains(RSAKey))
@@ -35,9 +35,9 @@ public class KnownServerHelper {
         edit.apply();
     }
 
-    public static void forget(String RSAKey)
+    public static void forget(String RSAKey, MainActivity mainActivity)
     {
-        SharedPreferences prefs = MainActivity.Instance.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = prefs.edit();
         Set<String> knownServers = prefs.getStringSet(PrefKeys.KnownServers, new HashSet<String>());
         if(knownServers.contains(RSAKey))

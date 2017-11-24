@@ -34,11 +34,11 @@ public class NetworkDiscoveryThread implements Runnable {
     private boolean silent = false;
 
 
-    public NetworkDiscoveryThread() {
-        main = MainActivity.Instance;
+    public NetworkDiscoveryThread(MainActivity mainActivity) {
+        main = mainActivity;
     }
-    public NetworkDiscoveryThread(boolean silent){
-        main = MainActivity.Instance;
+    public NetworkDiscoveryThread(boolean silent, MainActivity mainActivity){
+        main = mainActivity;
         this.silent = silent;
     }
 
@@ -176,7 +176,7 @@ public class NetworkDiscoveryThread implements Runnable {
                 main.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        MainActivity.Instance.networkEventHandlers.onServerDiscovered(server);
+                        main.networkEventHandlers.onServerDiscovered(server);
                     }
                 });
             }

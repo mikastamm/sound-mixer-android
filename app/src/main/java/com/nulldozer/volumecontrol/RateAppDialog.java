@@ -20,6 +20,13 @@ import android.widget.RatingBar;
 
 public class RateAppDialog extends DialogFragment {
 
+    private MainActivity mainActivity;
+
+    public void setMainActivity(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -30,7 +37,7 @@ public class RateAppDialog extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Button btnSubmit = (Button)view.findViewById(R.id.btnSubmitRating);
+        final Button btnSubmit = (Button)view.findViewById(R.id.btnSubmitRating);
         final RatingBar ratingBar = (RatingBar)view.findViewById(R.id.ratingBar);
 
         btnSubmit.setOnClickListener(new View.OnClickListener() {
@@ -41,13 +48,15 @@ public class RateAppDialog extends DialogFragment {
                 if(rating < 4)
                 {
                     FeedbackDialog feedbackDialog = new FeedbackDialog();
+                    feedbackDialog.setMainActivity(mainActivity);
                     feedbackDialog.setFeedbackType(FeedbackDialog.FeedbackType.BAD_FEEDBACK);
-                    feedbackDialog.show(MainActivity.Instance.getSupportFragmentManager(), "feedback-dialog");
+                    feedbackDialog.show(mainActivity.getSupportFragmentManager(), "feedback-dialog");
                     dismiss();
                 }
                 else{
                     RateOnPlayDialog rateDialog = new RateOnPlayDialog();
-                    rateDialog.show(MainActivity.Instance.getSupportFragmentManager(), "rate-on-play-dialog");
+                    rateDialog.setMainActivity(mainActivity);
+                    rateDialog.show(mainActivity.getSupportFragmentManager(), "rate-on-play-dialog");
                     dismiss();
                 }
             }
