@@ -1,6 +1,5 @@
 package com.nulldozer.volumecontrol;
 
-import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -21,11 +19,13 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
     ArrayList<VolumeServer> listElements;
     VolumeServer activeServer;
-
+    private MainActivity mainActivity;
+    
     final String TAG = "ServerListViewAdapter";
 
-    public ServerListViewAdapter(Context context, ArrayList<VolumeServer> users) {
+    public ServerListViewAdapter(MainActivity context, ArrayList<VolumeServer> users) {
         super(context, 0, users);
+        mainActivity = context;
         listElements = users;
     }
 
@@ -45,14 +45,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
     }
 
     public void removeActive(){
-        if(MainActivity.Instance.clientFragment.clientThread != null)
-        MainActivity.Instance.clientFragment.clientThread.listenerThread.interrupt();
-        
-        if(activeServer != null)
-        activeServer.active = false;
-
-        activeServer = null;
-        notifyDataSetChanged();
+        mainActivity.clientThread.close();
     }
 
     public VolumeServer getPasswordlessServer(){
@@ -78,12 +71,15 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         if(newActive != null) {
             newActive.active = true;
 
-            if(MainActivity.Instance.clientFragment.clientThread != null)
-                MainActivity.Instance.clientFragment.clientThread.close();
+            if(mainActivity.clientThread != null) {
+                mainActivity.clientThread.close();
+                if(mainActivity.clientFragment.clientConnection != null)
+                    mainActivity.clientFragment.clientConnection.close();
+            }
 
             activeServer = newActive;
-
-            MainActivity.Instance.clientFragment.clientThread = new ClientThread();
+            mainActivity.clientFragment.clientConnection = new ClientConnection(newActive);
+            mainActivity.clientThread = new ClientThread(mainActivity);
         }
         else{
             if(listElements.size() > 0)
@@ -97,7 +93,7 @@ public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
         }
 
         notifyDataSetChanged();
-        MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
+        mainActivity.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
     }
 
     @Override

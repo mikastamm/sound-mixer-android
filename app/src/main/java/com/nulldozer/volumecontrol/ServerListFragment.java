@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -34,12 +33,14 @@ public class ServerListFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.servers_list, container, false);
+
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState)
     {
         inflatedView = view;
+        Log.i(TAG, "Inflated ServerList layout");
     }
 
     public void initialize(){

@@ -20,103 +20,104 @@ import java.net.Socket;
 
 
 public class ClientThread{
-
-    public boolean connected;
-
+    
     public String currentMessage;
-
-    private Socket socket;
-    private BufferedReader inFromServer;
-    private OutputStream outstream;
-    private PrintWriter outWriter;
-
-    VolumeServer activeServer;
-
+    
+    private ClientConnection clientConnection;
+    
     public Thread listenerThread;
 
     private final String TAG = "ClientThread";
 
-    public ClientThread(){
-        if(MainActivity.Instance.serverListViewAdapter.activeServer != null) {
-            activeServer = MainActivity.Instance.serverListViewAdapter.activeServer;
+    private MainActivity mainActivity;
+
+    private final static int ReceiverInitTime = 1000;
+
+    public ClientThread(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
+        clientConnection = mainActivity.clientFragment.clientConnection;
+        if(clientConnection == null)
+        {
+            Log.i(TAG, "Active server null, aborting");
+            close();
+        }
+        else if(!clientConnection.connected)
+        {
+            Log.i(TAG, "clientConnection not yet connected, connecting...");
             Thread connectThread = new Thread(connectToDataPort);
             connectThread.start();
         }
         else{
-            Log.i(TAG, "Active server null, aborting");
-            close();
+            Log.i(TAG, "clientConnection is already connected, fragment retained");
+            sendAuthentication();
+            listenerThread = new Thread(receiveAudioData);
+            listenerThread.start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        Thread.sleep(ReceiverInitTime);
+                    }
+                    catch(InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    requestAllAudioSessionsFromServer.run();
+                }
+            }).start();
         }
     }
 
     public void close(){
-        Log.i(TAG, "Closing client Thread");
-        if(outWriter != null) {
-            outWriter.flush();
-            outWriter.close();
-        }
+        Log.w(TAG, "Closing client Thread");
 
-        try {
-            socket.close();
-            inFromServer.close();
-            outstream.close();
-            MainActivity.Instance.serverListViewAdapter.activeServer = null;
-            activeServer.active = false;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
+        if(mainActivity != null && mainActivity.serverListViewAdapter != null) {
+            if (mainActivity.serverListViewAdapter.activeServer != null)
+                mainActivity.serverListViewAdapter.activeServer.active = false;
+            mainActivity.serverListViewAdapter.activeServer = null;
+            mainActivity.serverListViewAdapter.notifyDataSetChanged();
         }
 
         if(listenerThread != null)
         listenerThread.interrupt();
 
-        MainActivity.Instance.listViewAdapterVolumeSliders.clear();
-    }
-
-
-    public void send(String data)
-    {
-            if(outWriter != null) {
-                outWriter.println(data);
-                outWriter.flush();
-            }
+        if(mainActivity != null)
+        mainActivity.listViewAdapterVolumeSliders.clear();
+        mainActivity = null;
     }
 
     public Runnable connectToDataPort = new Runnable() {
         @Override
         public void run() {
             try {
-                Log.i(TAG, "Active Server IP: " + activeServer.IPAddress);
+                Log.i(TAG, "Active Server IP: " + clientConnection.activeServer.IPAddress);
 
-                MainActivity.Instance.runOnUiThread(new Runnable() {
+                mainActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        MainActivity.Instance.networkEventHandlers.onConnectionInitiated(activeServer);
+                        mainActivity.networkEventHandlers.onConnectionInitiated(clientConnection.activeServer);
                     }
                 });
 
-                socket = new Socket(InetAddress.getByName(activeServer.IPAddress), Constants.SERVER_CONNECTION_TCP_PORT);
-                inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                outstream = socket.getOutputStream();
-                outWriter = new PrintWriter(outstream);
-                connected = true;
-                Log.i(TAG, "Connected to Server: " + activeServer.IPAddress);
+                clientConnection.connect();
+                
+                Log.i(TAG, "Connected to Server: " + clientConnection.activeServer.IPAddress);
 
                 ClientDevice thisDevice = new ClientDevice();
                 thisDevice.Name = Build.MODEL;
                 thisDevice.RSAKeyJSON = VCCryptography.getRSAPublicKeyJSON();
                 thisDevice.Version = BuildConfig.VERSION_CODE;
 
-                outWriter.println("DEVINFO" + JSONManager.serialize(thisDevice));
-                outWriter.flush();
-
+                clientConnection.send("DEVINFO" + JSONManager.serialize(thisDevice));
                 sendAuthentication();
 
                 listenerThread = new Thread(receiveAudioData);
                 listenerThread.start();
 
                 try{
-                    Thread.sleep(1000);
+                    Thread.sleep(ReceiverInitTime);
                 }
                 catch(InterruptedException e)
                 {
@@ -127,7 +128,8 @@ public class ClientThread{
             catch(IOException ioe)
             {
                 ioe.printStackTrace();
-                connected = false;
+                clientConnection.connected = false;
+                close();
             }
         }
     };
@@ -152,11 +154,10 @@ public class ClientThread{
 
         @Override
         public void run() {
-            if(connected && socket != null && outWriter != null)
+            if(clientConnection.connected && clientConnection.socket != null && clientConnection.outWriter != null)
             {
-
                 String toSend = JSONManager.serialize(data);
-                send("EDIT"+toSend);
+                clientConnection.send("EDIT"+toSend);
 
                 Log.i(TAG, "Sent Volume Change:" + toSend);
             }
@@ -173,9 +174,9 @@ public class ClientThread{
 
         @Override
         public void run() {
-            if(connected && socket != null && outWriter != null)
+            if(clientConnection.connected && clientConnection.socket != null && clientConnection.outWriter != null)
             {
-                send("TRACK"+data.id);
+                clientConnection.send("TRACK"+data.id);
 
 
                 Log.i(TAG, "Sent tracking Started");
@@ -193,9 +194,9 @@ public class ClientThread{
 
         @Override
         public void run() {
-            if(connected && socket != null && outWriter != null)
+            if(clientConnection.connected && clientConnection.socket != null && clientConnection.outWriter != null)
             {
-                send("ENDTRACK"+data.id);
+                clientConnection.send("ENDTRACK"+data.id);
 
                 Log.i("ClientThread", "Sent tracking End");
             }
@@ -209,9 +210,9 @@ public class ClientThread{
     public Runnable requestAllAudioSessionsFromServer = new Runnable() {
         @Override
         public void run() {
-            if(connected && socket != null && outWriter != null)
+            if(clientConnection.connected && clientConnection.socket != null && clientConnection.outWriter != null)
             {
-                send("GETAUDIOSESSIONS");
+                clientConnection.send("GETAUDIOSESSIONS");
 
                 Log.i("ClientThread", "Requested all audio sessions");
             }
@@ -233,12 +234,19 @@ public class ClientThread{
     public Runnable receiveAudioData = new Runnable() {
         @Override
         public void run() {
-            if(connected && socket != null && outWriter != null && inFromServer != null) {
+            if(clientConnection.connected && clientConnection.socket != null && clientConnection.outWriter != null && clientConnection.inFromServer != null) {
                 Log.i("ClientThread", "Now receiving AudioData...");
                 boolean endOfStream = false;
                 while (!Thread.interrupted() && !endOfStream) {
                     try {
-                        currentMessage = inFromServer.readLine();
+                        currentMessage = clientConnection.inFromServer.readLine();
+
+                        if(currentMessage == null)
+                        {
+                            Log.i(TAG, "EOS, Closing ClientThread");
+                            close();
+                            clientConnection.close();
+                        }
 
                         if (currentMessage != null && !Thread.interrupted()) {
                             final String msg = currentMessage;//VCCryptography.getDecryptedMessage(currentMessage);
@@ -248,36 +256,34 @@ public class ClientThread{
                                 sendAuthentication();
                             }
                             else if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
-                                SharedPreferences.Editor editor = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                                editor.putString(PrefKeys.LastConnectedServer_PrefKey, activeServer.RSAPublicKey);
-                                editor.apply();
+                                KnownServerHelper.addToKnown(clientConnection.activeServer.RSAPublicKey);
 
                                 String vDataJson = msg.substring(3);
                                 final VolumeData[] recv = JSONManager.deserialize(vDataJson, VolumeData[].class);
 
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        MainActivity.Instance.networkEventHandlers.onAudioSessionListReceived(activeServer, recv);
+                                        mainActivity.networkEventHandlers.onAudioSessionListReceived(clientConnection.activeServer, recv);
                                     }
                                 });
 
                             } else if (msg.startsWith("ADD")) { //Add a new AudioSession
 
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         String vDataJson = msg.substring(3);
 
                                         VolumeData recv = JSONManager.deserialize(vDataJson, VolumeData.class);
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.add(recv);
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                                        mainActivity.listViewAdapterVolumeSliders.add(recv);
+                                        mainActivity.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
+                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
                             } else if (msg.startsWith("EDIT")) // Edit an existing AudioSession
                             {
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         String vDataJson = msg.substring(4);
@@ -286,41 +292,41 @@ public class ClientThread{
                                         VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
 
                                         if(received != null) {
-                                            for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
-                                                if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
-                                                    if (!(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).mute != received.mute && MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute))
-                                                        MainActivity.Instance.listViewAdapterVolumeSliders.listElements.set(i, received);
+                                            for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                                if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                                                    if (!(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).mute != received.mute && mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute))
+                                                        mainActivity.listViewAdapterVolumeSliders.listElements.set(i, received);
                                                     else
-                                                        MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute = false;
+                                                        mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute = false;
 
                                                     break;
                                                 }
                                             }
 
-                                            MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                                            mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                         }
                                     }
                                 });
-                            } else if (msg.startsWith("DEL")) // Edit an existing AudioSession
+                            } else if (msg.startsWith("DEL"))
                             {
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         String vDataJson = msg.substring(3);
 
                                         VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
 
-                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
 
-                                            if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
-                                                MainActivity.Instance.listViewAdapterVolumeSliders.listElements.remove(i);
+                                            if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                                                mainActivity.listViewAdapterVolumeSliders.listElements.remove(i);
                                                 Log.i("ClientThread", "Removing item");
                                                 break;
                                             }
 
                                         }
 
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
                             }
@@ -329,27 +335,27 @@ public class ClientThread{
                                 String imgDataJson = msg.substring(4);
                                 final ApplicationIcon[] icons = JSONManager.deserialize(imgDataJson, ApplicationIcon[].class);
                                 Log.i("ClientThread", "Received Icons");
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
                                             for (int j = 0; j < icons.length; j++) {
-                                                if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icons[j].id)) {
+                                                if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icons[j].id)) {
 
                                                     byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP); //TODO: If more performance needed move this out of run on ui
                                                     Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
 
                                                     if (bitmap == null) {
-                                                        MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
+                                                        mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
                                                     } else {
-                                                        MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
+                                                        mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
                                                     }
 
 
                                                 }
                                             }
                                         }
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
 
@@ -362,20 +368,20 @@ public class ClientThread{
                                 final Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
 
                                 Log.i("ClientThread", "Received Icon");
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
 
-                                        for (int i = 0; i < MainActivity.Instance.listViewAdapterVolumeSliders.listElements.size(); i++) {
-                                            if (MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icon.id)) {
+                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                                            if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icon.id)) {
                                                 if (bitmap == null) {
-                                                    MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(MainActivity.Instance.getResources(), R.mipmap.application_icon));
+                                                    mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
                                                 } else {
-                                                    MainActivity.Instance.listViewAdapterVolumeSliders.sessionIcons.put(MainActivity.Instance.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
+                                                    mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
                                                 }
                                             }
                                         }
-                                        MainActivity.Instance.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
                                     }
                                 });
 
@@ -384,17 +390,17 @@ public class ClientThread{
                             {
                                 Log.i(TAG, "Wrong password");
 
-                                SharedPreferences prefs = MainActivity.Instance.getPreferences(MainActivity.MODE_PRIVATE);
+                                SharedPreferences prefs = mainActivity.getPreferences(MainActivity.MODE_PRIVATE);
                                 SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString(PrefKeys.ServerStandardPasswordPrefix_PrefKey+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
+                                editor.putString(PrefKeys.ServerStandardPasswordPrefix +VCCryptography.getMD5Hash(clientConnection.activeServer.RSAPublicKey), "");
                                 editor.apply();
 
-                                MainActivity.Instance.runOnUiThread(new Runnable() {
+                                mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(MainActivity.Instance, "Wrong password for \"" + activeServer.name + "\"", Toast.LENGTH_LONG).show();
-                                        activeServer.standardPassword = "";
-                                        MainActivity.Instance.serverListViewAdapter.removeActive();
+                                        Toast.makeText(mainActivity, "Wrong password for \"" + clientConnection.activeServer.name + "\"", Toast.LENGTH_LONG).show();
+                                        clientConnection.activeServer.standardPassword = "";
+                                        mainActivity.serverListViewAdapter.removeActive();
                                     }
                                 });
                                 return;
@@ -409,51 +415,34 @@ public class ClientThread{
                             ioe.printStackTrace();
                             close();
 
-                            MainActivity.Instance.runOnUiThread(new Runnable() {
+                            mainActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    MainActivity.Instance.networkEventHandlers.onServerDisconnected();
+                                    mainActivity.networkEventHandlers.onServerDisconnected();
                                 }
                             });
 
                             return;
                     }
                 }
-                close();
+                Log.i(TAG, "Stopped receiving data " + (endOfStream ? " (End of Stream)" : " (Thread Interrupted)"));
             }
         }
     };
 
     public void sendAuthentication(){
         try {
-            byte[] encryptedData = VCCryptography.encrypt(VCCryptography.getMD5Hash(activeServer.standardPassword), activeServer.RSAPublicKey);
+            byte[] encryptedData = VCCryptography.encrypt(VCCryptography.getMD5Hash(clientConnection.activeServer.standardPassword), clientConnection.activeServer.RSAPublicKey);
             byte[] base64Data = Base64.encode(encryptedData, Base64.NO_WRAP);
             String encryptedString = new String(base64Data, "UTF-8");
             String authMessage = "AUTH" + encryptedString;
-            send(authMessage);
+            clientConnection.send(authMessage);
         }
         catch (UnsupportedEncodingException ex)
         {
             ex.printStackTrace();
         }
     }
-
-    private enum MessageType{INIT, ADD, REMOVE, ICON}
-
-    public class ClientDevice{
-        public String Name;
-        public String RSAKeyJSON;
-        public int Version;
-    }
-
-    public class ApplicationIcon{
-        public String icon;
-        public String id;
-    }
-
-
-
-
 
 }
 

@@ -34,10 +34,10 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
 
         Pair<Integer, Boolean> muteChanged;
 
-        public ListViewAdapter(Context context, ArrayList<VolumeData> users) {
+        public ListViewAdapter(MainActivity context, ArrayList<VolumeData> users) {
             super(context, 0, users);
             listElements = users;
-            main = (MainActivity)context;
+            main = context;
             sessionIcons = new HashMap<>();
             progressBarDrawables = new HashMap<>();
         }
@@ -55,7 +55,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
         public void clear()
         {
             listElements.clear();
-            MainActivity.Instance.runOnUiThread(new Runnable() {
+            main.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     notifyDataSetChanged();
@@ -98,11 +98,11 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
 
             if(Settings.nightmode)
             {
-                txtApplicationName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorTextNight));
+                txtApplicationName.setTextColor(ContextCompat.getColor(main, R.color.colorTextNight));
                 frlShadows.setBackgroundResource(R.drawable.seekbar_card_background_night);
             }
             else{
-                txtApplicationName.setTextColor(ContextCompat.getColor(MainActivity.Instance, R.color.colorText));
+                txtApplicationName.setTextColor(ContextCompat.getColor(main, R.color.colorText));
                 frlShadows.setBackgroundResource(R.drawable.seekbar_card_background);
             }
 
@@ -116,7 +116,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 public void onClick(View v) {
                     vm.mute = !vm.mute;
                     vm.ignoreNextMute = true;
-                    MainActivity.Instance.clientFragment.clientThread.sendVolumeData(vm);
+                    main.clientThread.sendVolumeData(vm);
                     Log.i("ListViewAdapter", "Mute: " + vm.mute);
                     notifyDataSetChanged();
                 }
@@ -126,10 +126,10 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
-                        if (MainActivity.Instance.clientFragment.clientThread.connected) {
+                        if (main.clientFragment.clientConnection.connected) {
                             if(!Settings.reduceSliderSensitivity || !vm.sentLast) {
                                 vm.volume = progress / 100f;
-                                MainActivity.Instance.clientFragment.clientThread.sendVolumeData(vm);
+                                main.clientThread.sendVolumeData(vm);
 
                                 if(Settings.reduceSliderSensitivity)
                                 {
@@ -145,23 +145,23 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
 
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
-                    if (MainActivity.Instance.clientFragment.clientThread.connected) {
-                        MainActivity.Instance.clientFragment.clientThread.startTracking(vm);
+                    if (main.clientFragment.clientConnection.connected) {
+                        main.clientThread.startTracking(vm);
                         vm.isTracking = true;
                     }
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    if (MainActivity.Instance.clientFragment.clientThread.connected) {
+                    if (main.clientFragment.clientConnection.connected) {
 
                         if(Settings.reduceSliderSensitivity)
                         {
                             vm.volume = vsbSeekBar.getProgress() / 100f;
-                            MainActivity.Instance.clientFragment.clientThread.sendVolumeData(vm);
+                            main.clientThread.sendVolumeData(vm);
                         }
 
-                        MainActivity.Instance.clientFragment.clientThread.endTracking(vm);
+                        main.clientThread.endTracking(vm);
                         vm.isTracking = false;
                     }
                 }
@@ -279,11 +279,11 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
 
 //            int height = vsbSeekBar.getWidth();
 //            int distance = height / 100;
-//            Resources res = MainActivity.Instance.getResources();
+//            Resources res = main.getResources();
 //
 //            for(int i = 0; i <= 100; i++)
 //            {
-//                View tick = new View(MainActivity.Instance);
+//                View tick = new View(main);
 //
 //                LinearLayout.LayoutParams params;
 //                if(i % 10 == 0)

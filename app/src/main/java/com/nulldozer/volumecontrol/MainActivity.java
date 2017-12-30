@@ -1,28 +1,14 @@
 package com.nulldozer.volumecontrol;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import org.lucasr.twowayview.*;
 
@@ -46,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static MainActivity Instance;
     public ClientFragment clientFragment;
+    public ClientThread clientThread;
 
     boolean passwordDialogOpen = false;
     SettingsManager settingsManager;
@@ -67,11 +54,19 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         // this means that this activity will not be recreated now, user is leaving it
         // or the activity is otherwise finishing
+        clientThread.close();
         if(isFinishing()) {
             // we will not need this fragment anymore, this may also be a good place to signal
             // to the retained fragment object to perform its own cleanup.
             fragmentManager.beginTransaction().remove(clientFragment).commit();
         }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        clientFragment = getClientConnectionFragment();
+        clientThread = new ClientThread(this);
     }
 
     @Override
@@ -104,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
         serverListFragment = (ServerListFragment)getSupportFragmentManager().findFragmentById(R.id.fragmentServerList);
         serverListFragment.initialize();
 
-        clientFragment = getClientFragment();
         if(!fragmentRetained)
             new NetworkDiscoveryThread().start();
         else
@@ -176,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-    public ClientFragment getClientFragment() {
+    public ClientFragment getClientConnectionFragment() {
         ClientFragment fragment;
         if(fragmentManager != null)
         {
@@ -184,18 +178,20 @@ public class MainActivity extends AppCompatActivity {
 
             if(fragment != null)
             {
-                serverListViewAdapter.activeServer = fragment.clientThread.activeServer;
+                serverListViewAdapter.activeServer = fragment.clientConnection.activeServer;
+                if(serverListViewAdapter.activeServer != null) {
                     serverListViewAdapter.activeServer.active = true;
+                }
 
-                serverListViewAdapter.notifyDataSetChanged();
-                new Thread(fragment.clientThread.requestAllAudioSessionsFromServer).start();
                 fragmentRetained = true;
+
                 return fragment;
             }
         }
         fragmentRetained = false;
         fragment = new ClientFragment();
-        fragment.clientThread = new ClientThread();
+        if(serverListViewAdapter.activeServer != null)
+        fragment.clientConnection = new ClientConnection(serverListViewAdapter.activeServer);
         if(fragmentManager != null)
         {
             fragmentManager.beginTransaction().add(fragment, TagClientFragment).commit();
@@ -230,7 +226,8 @@ public class MainActivity extends AppCompatActivity {
                     else{
                         masterVolume.volume = 1;
                     }
-                    clientFragment.clientThread.sendVolumeData(masterVolume);
+                    if(clientThread != null)
+                    clientThread.sendVolumeData(masterVolume);
                 }
 
                 return true;
@@ -244,7 +241,8 @@ public class MainActivity extends AppCompatActivity {
                     else{
                         masterVolume.volume = 0;
                     }
-                    clientFragment.clientThread.sendVolumeData(masterVolume);
+                    if(clientThread != null)
+                    clientThread.sendVolumeData(masterVolume);
                 }
 
                 return true;

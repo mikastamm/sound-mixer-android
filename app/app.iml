@@ -146,11 +146,15 @@
     <orderEntry type="library" name="com.google.code.gson:gson:2.2.4@jar" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-gass-license-11.4.2" level="project" />
     <orderEntry type="library" name="com.android.support:appcompat-v7-25.3.1" level="project" />
+    <orderEntry type="library" name="com.squareup.haha:haha:2.0.3@jar" level="project" />
     <orderEntry type="library" name="org.lucasr.twowayview:twowayview-0.1.1" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-ads-lite-11.4.2" level="project" />
     <orderEntry type="library" name="com.mopub.volley:mopub-volley:1.1.0@jar" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-android-1.5.4" level="project" />
     <orderEntry type="library" name="com.android.support:support-vector-drawable-25.3.1" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-analyzer-1.5.4" level="project" />
     <orderEntry type="library" name="com.android.support:support-annotations:25.3.1@jar" level="project" />
     <orderEntry type="library" name="com.google.android.gms:play-services-gass-11.4.2" level="project" />
+    <orderEntry type="library" name="com.squareup.leakcanary:leakcanary-watcher:1.5.4@jar" level="project" />
   </component>
 </module>
