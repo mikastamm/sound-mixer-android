@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         if(!fragmentRetained)
             new NetworkDiscoveryThread(this).start();
         else
-            new NetworkDiscoveryThread(true, this).start();
+            new NetworkDiscoveryThread(false,this).start();
 
         broadcastReceiver = new BroadcastReceiverThread();
         broadcastReceiver.start(this);

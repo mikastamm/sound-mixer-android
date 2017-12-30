@@ -201,6 +201,8 @@ class SidebarController {
             }
         }).start();
 
+
+
         final ValueAnimator anim = ValueAnimator.ofInt( (isLandscape ? sideBarContentLL.getMeasuredWidth() : sideBarContentLL.getMeasuredHeight()), targetDimension);
         anim.setEvaluator(easing);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -235,6 +237,8 @@ class SidebarController {
 
         //  sideBarContentLL.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
         sideBarExpanded = !sideBarExpanded;
+
+
     }
 
 }

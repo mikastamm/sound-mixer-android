@@ -30,7 +30,7 @@ public class NetworkEventHandlers {
     }
 
     public void onServerDisconnected(){
-        if(mainActivity.serverListViewAdapter.listElements.size() == 0)
+        Log.i(TAG, "onServerDisconnected()");
         new NetworkDiscoveryThread(mainActivity).start();
     }
 
@@ -72,8 +72,6 @@ public class NetworkEventHandlers {
 
             mainActivity.serverRefreshByUser.refreshServersTip.setVisibility(View.VISIBLE);
 
-            if(!mainActivity.sidebarController.sideBarExpanded && !mainActivity.fragmentRetained)
-                mainActivity.sidebarController.toggleSidebar();
         }
 
         if(serverListViewAdapter.activeServer == null && !mainActivity.sidebarController.sideBarExpanded)

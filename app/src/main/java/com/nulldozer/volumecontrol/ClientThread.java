@@ -63,6 +63,7 @@ public class ClientThread{
             inFromServer.close();
             outstream.close();
             mainActivity.serverListViewAdapter.activeServer = null;
+            mainActivity.listViewAdapterVolumeSliders.clear();
         }
         catch (Exception ex)
         {
@@ -72,7 +73,7 @@ public class ClientThread{
         if(listenerThread != null)
         listenerThread.interrupt();
 
-        mainActivity.listViewAdapterVolumeSliders.clear();
+
     }
 
 
@@ -251,155 +252,27 @@ public class ClientThread{
                                 sendAuthentication();
                             }
                             else if (msg.startsWith("REP")) { //Repopulate Data set (Clear & Set)
-                                SharedPreferences.Editor editor = mainActivity.getPreferences(MainActivity.MODE_PRIVATE).edit();
-                                editor.putString(PrefKeys.LastConnectedServer, activeServer.RSAPublicKey);
-                                editor.apply();
-
-                                String vDataJson = msg.substring(3);
-                                final VolumeData[] recv = JSONManager.deserialize(vDataJson, VolumeData[].class);
-
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mainActivity.networkEventHandlers.onAudioSessionListReceived(activeServer, recv);
-                                    }
-                                });
-
+                                handleRepopulateReceived(msg);
                             } else if (msg.startsWith("ADD")) { //Add a new AudioSession
-
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        String vDataJson = msg.substring(3);
-
-                                        VolumeData recv = JSONManager.deserialize(vDataJson, VolumeData.class);
-                                        mainActivity.listViewAdapterVolumeSliders.add(recv);
-                                        mainActivity.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
-                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                                    }
-                                });
+                                handleAddNewSessionReceived(msg);
                             } else if (msg.startsWith("EDIT")) // Edit an existing AudioSession
                             {
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        String vDataJson = msg.substring(4);
-
-
-                                        VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
-
-                                        if(received != null) {
-                                            for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
-                                                if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
-                                                    if (!(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).mute != received.mute && mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute))
-                                                        mainActivity.listViewAdapterVolumeSliders.listElements.set(i, received);
-                                                    else
-                                                        mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute = false;
-
-                                                    break;
-                                                }
-                                            }
-
-                                            mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                                        }
-                                    }
-                                });
-                            } else if (msg.startsWith("DEL")) // Edit an existing AudioSession
+                                handleEditSessionReceived(msg);
+                            } else if (msg.startsWith("DEL")) // Delete an existing AudioSession
                             {
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        String vDataJson = msg.substring(3);
-
-                                        VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
-
-                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
-
-                                            if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
-                                                mainActivity.listViewAdapterVolumeSliders.listElements.remove(i);
-                                                Log.i("ClientThread", "Removing item");
-                                                break;
-                                            }
-
-                                        }
-
-                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                                    }
-                                });
+                                handleRemoveApplicationReceived(msg);
                             }
                             else if (msg.startsWith("IMGS")) // All application icons
                             {
-                                String imgDataJson = msg.substring(4);
-                                final ApplicationIcon[] icons = JSONManager.deserialize(imgDataJson, ApplicationIcon[].class);
-                                Log.i("ClientThread", "Received Icons");
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
-                                            for (int j = 0; j < icons.length; j++) {
-                                                if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icons[j].id)) {
-
-                                                    byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP); //TODO: If more performance needed move this out of run on ui
-                                                    Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
-
-                                                    if (bitmap == null) {
-                                                        mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
-                                                    } else {
-                                                        mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
-                                                    }
-
-
-                                                }
-                                            }
-                                        }
-                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                                    }
-                                });
-
+                               handleImagesReceived(msg);
                             }
                             else if (msg.startsWith("IMG")) // Single application Icon
                             {
-                                String imgDataJson = msg.substring(3);
-                                final ApplicationIcon icon = JSONManager.deserialize(imgDataJson, ApplicationIcon.class);
-                                byte[] imgBytes = Base64.decode(icon.icon, Base64.NO_WRAP);
-                                final Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
-
-                                Log.i("ClientThread", "Received Icon");
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
-                                            if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icon.id)) {
-                                                if (bitmap == null) {
-                                                    mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
-                                                } else {
-                                                    mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
-                                                }
-                                            }
-                                        }
-                                        mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
-                                    }
-                                });
-
+                                handleSingleImageReceived(msg);
                             }
                             else if(msg.equals("AUTHWPW"))
                             {
-                                Log.i(TAG, "Wrong password");
-
-                                SharedPreferences prefs = mainActivity.getPreferences(MainActivity.MODE_PRIVATE);
-                                SharedPreferences.Editor editor = prefs.edit();
-                                editor.putString(PrefKeys.ServerStandardPasswordPrefix+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
-                                editor.apply();
-
-                                mainActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(mainActivity, "Wrong password for \"" + activeServer.name + "\"", Toast.LENGTH_LONG).show();
-                                        activeServer.standardPassword = "";
-                                        mainActivity.serverListViewAdapter.removeActive();
-                                    }
-                                });
+                                handleWrongPasswordReceived();
                                 return;
                             }
                         }
@@ -410,22 +283,178 @@ public class ClientThread{
                     } catch (IOException ioe) {
                             Log.i(TAG, "Connection to server lost");
                             ioe.printStackTrace();
-                            close();
 
+                            if(mainActivity != null)
                             mainActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mainActivity.networkEventHandlers.onServerDisconnected();
                                 }
                             });
-
+                            close();
                             return;
                     }
                 }
+                if(mainActivity != null)
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainActivity.networkEventHandlers.onServerDisconnected();
+                        }
+                    });
                 close();
             }
         }
     };
+
+    private void handleRepopulateReceived(String msg){
+        PrefHelper.setStringPreference(mainActivity, PrefKeys.LastConnectedServer, activeServer.RSAPublicKey);
+
+        String vDataJson = msg.substring(3);
+        final VolumeData[] recv = JSONManager.deserialize(vDataJson, VolumeData[].class);
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.networkEventHandlers.onAudioSessionListReceived(activeServer, recv);
+            }
+        });
+    }
+
+    private void handleAddNewSessionReceived(final String msg)
+    {
+        String vDataJson = msg.substring(3);
+        final VolumeData recv = JSONManager.deserialize(vDataJson, VolumeData.class);
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mainActivity.listViewAdapterVolumeSliders.add(recv);
+                mainActivity.listViewAdapterVolumeSliders.refreshProgressDrawables = true;
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void handleEditSessionReceived(final String msg){
+
+        String vDataJson = msg.substring(4);
+        final VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(received != null) {
+                    for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                        if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                            if (!(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).mute != received.mute && mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute))
+                                mainActivity.listViewAdapterVolumeSliders.listElements.set(i, received);
+                            else
+                                mainActivity.listViewAdapterVolumeSliders.listElements.get(i).ignoreNextMute = false;
+
+                            break;
+                        }
+                    }
+
+                    mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    private void handleRemoveApplicationReceived(final String msg)
+    {
+        String vDataJson = msg.substring(3);
+        final VolumeData received = JSONManager.deserialize(vDataJson, VolumeData.class);
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+
+                    if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(received.id)) {
+                        mainActivity.listViewAdapterVolumeSliders.listElements.remove(i);
+                        Log.i("ClientThread", "Removing item");
+                        break;
+                    }
+
+                }
+
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void handleImagesReceived(String msg){
+        String imgDataJson = msg.substring(4);
+        final ApplicationIcon[] icons = JSONManager.deserialize(imgDataJson, ApplicationIcon[].class);
+        Log.i("ClientThread", "Received Icons");
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                    for (int j = 0; j < icons.length; j++) {
+                        if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icons[j].id)) {
+
+                            byte[] imgBytes = Base64.decode(icons[j].icon, Base64.NO_WRAP); //TODO: If more performance needed move this out of run on ui
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+
+                            if (bitmap == null) {
+                                mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
+                            } else {
+                                mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
+                            }
+
+
+                        }
+                    }
+                }
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+            }
+        });
+
+    }
+
+    private void handleSingleImageReceived(String msg){
+        String imgDataJson = msg.substring(3);
+        final ApplicationIcon icon = JSONManager.deserialize(imgDataJson, ApplicationIcon.class);
+        byte[] imgBytes = Base64.decode(icon.icon, Base64.NO_WRAP);
+        final Bitmap bitmap = BitmapFactory.decodeByteArray(imgBytes, 0, imgBytes.length);
+
+        Log.i("ClientThread", "Received Icon");
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                for (int i = 0; i < mainActivity.listViewAdapterVolumeSliders.listElements.size(); i++) {
+                    if (mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id.equals(icon.id)) {
+                        if (bitmap == null) {
+                            mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, BitmapFactory.decodeResource(mainActivity.getResources(), R.mipmap.application_icon));
+                        } else {
+                            mainActivity.listViewAdapterVolumeSliders.sessionIcons.put(mainActivity.listViewAdapterVolumeSliders.listElements.get(i).id, bitmap);
+                        }
+                    }
+                }
+                mainActivity.listViewAdapterVolumeSliders.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private void handleWrongPasswordReceived(){
+        Log.i(TAG, "Wrong password");
+        PrefHelper.setStringPreference(mainActivity, PrefKeys.ServerStandardPasswordPrefix+VCCryptography.getMD5Hash(activeServer.RSAPublicKey), "");
+        activeServer.standardPassword = "";
+
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mainActivity, "Wrong password for \"" + activeServer.name + "\"", Toast.LENGTH_LONG).show();
+                mainActivity.serverListViewAdapter.removeActive();
+            }
+        });
+    }
 
     public void sendAuthentication(){
         try {
