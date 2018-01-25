@@ -29,7 +29,7 @@ public class ListViewAdapter extends ArrayAdapter<VolumeData> {
         ArrayList<VolumeData> listElements;
         HashMap<String, Bitmap> sessionIcons;
         HashMap<Integer, Drawable> progressBarDrawables;
-        boolean refreshProgressDrawables = false;
+        public boolean refreshProgressDrawables = false;
         MainActivity main;
 
         public ListViewAdapter(MainActivity context, ArrayList<VolumeData> users) {

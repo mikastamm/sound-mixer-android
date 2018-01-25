@@ -1,4 +1,4 @@
-package com.nulldozer.volumecontrol;
+package com.nulldozer.volumecontrol.ServerSideBar;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -12,6 +12,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.nulldozer.volumecontrol.ClientThread;
+import com.nulldozer.volumecontrol.IconResourceIDs;
+import com.nulldozer.volumecontrol.MainActivity;
+import com.nulldozer.volumecontrol.R;
+import com.nulldozer.volumecontrol.Settings;
+import com.nulldozer.volumecontrol.VolumeServer;
+
 import java.util.ArrayList;
 
 /**
@@ -19,8 +26,8 @@ import java.util.ArrayList;
  */
 public class ServerListViewAdapter extends ArrayAdapter<VolumeServer> {
 
-    ArrayList<VolumeServer> listElements;
-    VolumeServer activeServer;
+    public ArrayList<VolumeServer> listElements;
+    public VolumeServer activeServer;
     MainActivity mainActivity;
     
     final String TAG = "ServerListViewAdapter";

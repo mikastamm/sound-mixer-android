@@ -1,30 +1,18 @@
 package com.nulldozer.volumecontrol;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-import android.widget.Toast;
 
+
+import com.nulldozer.volumecontrol.ServerSideBar.ServerListFragment;
+import com.nulldozer.volumecontrol.ServerSideBar.ServerListViewAdapter;
 
 import org.lucasr.twowayview.*;
 

@@ -9,6 +9,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nulldozer.volumecontrol.ServerSideBar.ServerListViewAdapter;
+
 
 /**
  * Created by Mika on 02.11.2017.

@@ -1,4 +1,4 @@
-package com.nulldozer.volumecontrol;
+package com.nulldozer.volumecontrol.ServerSideBar;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,9 +11,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
+
+import com.nulldozer.volumecontrol.KnownServerHelper;
+import com.nulldozer.volumecontrol.MainActivity;
+import com.nulldozer.volumecontrol.PasswordDialog;
+import com.nulldozer.volumecontrol.PrefKeys;
+import com.nulldozer.volumecontrol.R;
+import com.nulldozer.volumecontrol.VCCryptography;
+import com.nulldozer.volumecontrol.VolumeServer;
 
 import org.lucasr.twowayview.TwoWayView;
 
@@ -28,7 +35,7 @@ public class ServerListFragment extends Fragment {
     private final static String TAG = "ServerListFragment";
     private View inflatedView;
     public TwoWayView listViewServers;
-
+    private ServerListViewAdapter adapter;
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,30 +51,14 @@ public class ServerListFragment extends Fragment {
     }
 
     public void initialize(final MainActivity mainActivity){
-        mainActivity.serverListViewAdapter = new ServerListViewAdapter(mainActivity, new ArrayList<VolumeServer>());
+        adapter = new ServerListViewAdapter(mainActivity, new ArrayList<VolumeServer>());
         listViewServers = (TwoWayView)inflatedView.findViewById(R.id.listViewServers);
-        listViewServers.setAdapter(mainActivity.serverListViewAdapter);
+        listViewServers.setAdapter(adapter);
 
         listViewServers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final VolumeServer selectedServer = mainActivity.serverListViewAdapter.listElements.get(position);
 
-                if (mainActivity.serverListViewAdapter.activeServer != null && mainActivity.serverListViewAdapter.activeServer.RSAPublicKey.equals(selectedServer.RSAPublicKey)) {
-                    Toast.makeText(mainActivity, "Already connected to " + selectedServer.name, Toast.LENGTH_SHORT).show();
-                } else if (selectedServer.hasPassword && selectedServer.standardPassword.equals("")) {
-                    final SharedPreferences prefs = mainActivity.getPreferences(Context.MODE_PRIVATE);
-                    Log.i("MainActivity", "Selected server requires authentification, showing Password Dialog");
-                    Log.i(TAG, "Saved Password:" + prefs.getString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(selectedServer.RSAPublicKey), ""));
-
-                    PasswordDialog pwDialog = new PasswordDialog();
-                    pwDialog.setMainActivity(mainActivity);
-                    pwDialog.setServer(selectedServer);
-                    pwDialog.show(mainActivity.getSupportFragmentManager(), "password-dialog");
-
-                } else {
-                    mainActivity.serverListViewAdapter.setActive(selectedServer);
-                }
             }
         });
 
@@ -86,13 +77,13 @@ public class ServerListFragment extends Fragment {
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getTitle().equals(getString(R.string.server_menu_forget))) {
                             SharedPreferences.Editor editor = mainActivity.getPreferences(Context.MODE_PRIVATE).edit();
-                            editor.putString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(mainActivity.serverListViewAdapter.listElements.get(pos).RSAPublicKey), "");
-                            mainActivity.serverListViewAdapter.listElements.get(pos).standardPassword = "";
+                            editor.putString(PrefKeys.ServerStandardPasswordPrefix + VCCryptography.getMD5Hash(adapter.listElements.get(pos).RSAPublicKey), "");
+                            adapter.listElements.get(pos).standardPassword = "";
                             editor.apply();
 
-                            Log.i(TAG, "Forgot password for " + mainActivity.serverListViewAdapter.listElements.get(pos).name);
+                            Log.i(TAG, "Forgot password for " + adapter.listElements.get(pos).name);
                         } else if (item.getTitle().equals(getString(R.string.server_menu_disconnect))) {
-                            KnownServerHelper.forget(mainActivity.serverListViewAdapter.listElements.get(pos).RSAPublicKey, mainActivity);
+                            KnownServerHelper.forget(adapter.listElements.get(pos).RSAPublicKey, mainActivity);
 
                             if(mainActivity.clientFragment.clientThread != null)
                                 mainActivity.clientFragment.clientThread.close();
@@ -105,4 +96,6 @@ public class ServerListFragment extends Fragment {
             }
         });
     }
+
+
 }
