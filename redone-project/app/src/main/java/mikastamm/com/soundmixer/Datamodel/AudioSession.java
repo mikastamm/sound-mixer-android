@@ -31,6 +31,7 @@ public class AudioSession {
             title = session.title;
             volume = session.volume;
             mute = session.mute;
+            icon = session.icon;
         }
         else{
             throw new RuntimeException("Audio Session ID Mismatch : ("+id +" to " + session.id +") Attempted to update Audio Session with another Audio Session that does not have the same id");

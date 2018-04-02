@@ -112,7 +112,8 @@ public class AndroidMockDataFactory {
         StringBuilder s = new StringBuilder();
         for (int j = 0; j < len; j++)
         {
-            s.append(chars[r.nextInt() % chars.length]);
+            int index = Math.abs(r.nextInt() % chars.length);
+            s.append(chars[index]);
         }
         return s.toString();
     }

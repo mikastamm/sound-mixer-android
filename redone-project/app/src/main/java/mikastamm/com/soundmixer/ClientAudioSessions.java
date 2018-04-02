@@ -14,6 +14,10 @@ public class ClientAudioSessions {
 
     private List<AudioSession> audioSessions = new ArrayList<>();
 
+    public ClientAudioSessions(){
+        listener = new AudioSessionListener();
+    }
+
     public void addAudioSession(AudioSession session)
     {
         audioSessions.add(session);

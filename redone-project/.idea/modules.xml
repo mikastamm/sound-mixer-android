@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SoundMixer.iml" filepath="$PROJECT_DIR$/SoundMixer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/redone-project.iml" filepath="$PROJECT_DIR$/redone-project.iml" />
     </modules>
   </component>
 </project>

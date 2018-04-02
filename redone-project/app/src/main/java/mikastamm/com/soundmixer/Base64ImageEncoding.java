@@ -31,6 +31,9 @@ public class Base64ImageEncoding implements ImageEncoding {
 
     @Override
     public String encode(Bitmap decoded) {
+        if(decoded == null)
+            return null;
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         decoded.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();

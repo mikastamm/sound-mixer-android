@@ -43,7 +43,13 @@ public class MessageHandlerTests {
 
             //Compare Encoded Strings of Icon A and Icon B
             ImageEncoding enc = ImageEncodingFactory.getStandardEncoding();
-            Assert.assertTrue(enc.encode(a.icon).equals(enc.encode(b.icon)));
+            String encodedIconA = enc.encode(a.icon);
+            String encodedIconB = enc.encode(b.icon);
+
+            if(encodedIconA != null)
+                Assert.assertTrue(encodedIconA.equals(encodedIconB));
+            else
+                Assert.assertTrue(encodedIconB == null);
         }
     }
 

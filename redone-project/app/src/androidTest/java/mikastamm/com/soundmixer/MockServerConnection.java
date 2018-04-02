@@ -3,6 +3,7 @@ package mikastamm.com.soundmixer;
 import android.graphics.Bitmap;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -19,7 +20,7 @@ import mikastamm.com.soundmixer.Networking.ServerConnection;
 public class MockServerConnection implements ServerConnection {
     boolean connected = false;
     public List<AudioSession> sessions = new ArrayList<>();
-    private Stack<ReadLineMessageType> nextMessageTypes = new Stack<>();
+    private ArrayDeque<ReadLineMessageType> nextMessageTypes = new ArrayDeque<>();
     public static int repopulateApplicationCount = 6;
 
     @Override
@@ -34,7 +35,12 @@ public class MockServerConnection implements ServerConnection {
 
     @Override
     public String readLine() throws IOException {
-        ReadLineMessageType messageType = nextMessageTypes.pop();
+        ReadLineMessageType messageType = null;
+
+        if(!nextMessageTypes.isEmpty())
+        messageType = nextMessageTypes.pop();
+
+
         if(messageType == ReadLineMessageType.REPOPULATE)
         {
             List<AudioSession> newSessions = AndroidMockDataFactory.getAudioSessions(repopulateApplicationCount);
@@ -52,8 +58,9 @@ public class MockServerConnection implements ServerConnection {
         }
         else if(messageType == ReadLineMessageType.REMOVE)
         {
+            String json = Json.serialize(sessions.get(0));
             sessions.remove(0);
-            return "DEL" + Json.serialize(sessions.get(0));
+            return "DEL" + json;
         }
         else if(messageType == ReadLineMessageType.EDIT)
         {
