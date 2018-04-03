@@ -10,6 +10,8 @@ import java.util.List;
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Networking.MessageHandlerFactory;
+import mikastamm.com.soundmixer.Networking.MessageHandlers.AddImageToAudioSessionMessageHandler;
+import mikastamm.com.soundmixer.Networking.MessageHandlers.EditAudioSessionMessageHandler;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.ReceivedMessageHandler;
 
 /**
@@ -52,6 +54,8 @@ public class MessageHandlerTests {
                 Assert.assertTrue(encodedIconB == null);
         }
     }
+
+
 
     @Test
     public void test_Rep(){
@@ -97,6 +101,109 @@ public class MessageHandlerTests {
             
             Assert.assertTrue(audioSessions.getAudioSessionListCopy().size() == connection.sessions.size()
                     && audioSessions.getAudioSessionListCopy().size() == 0);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_add(){
+        setup();
+        for (int i = 0; i < 10; i++) {
+            connection.addNextMessageType(MockServerConnection.ReadLineMessageType.ADD);
+        }
+
+        try {
+            String msg;
+            while ((msg = connection.readLine()) != null) {
+                ReceivedMessageHandler handler = MessageHandlerFactory.getHandler(msg, server.id);
+                handler.handleMessage();
+            }
+
+            AssertAudioSessionListsEqual(connection.sessions, audioSessions.getAudioSessionListCopy());
+            Assert.assertTrue(connection.sessions.size() == 10);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_removeOnEmpty(){
+        setup();
+        connection.addNextMessageType(MockServerConnection.ReadLineMessageType.REMOVE);
+
+        try {
+            String msg;
+            while ((msg = connection.readLine()) != null) {
+                ReceivedMessageHandler handler = MessageHandlerFactory.getHandler(msg, server.id);
+                handler.handleMessage();
+            }
+
+            AssertAudioSessionListsEqual(connection.sessions, audioSessions.getAudioSessionListCopy());
+            Assert.assertTrue(connection.sessions.size() == 0);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_addAndRep(){
+        setup();
+        for (int i = 0; i < 10; i++) {
+            connection.addNextMessageType(MockServerConnection.ReadLineMessageType.ADD);
+        }
+        connection.addNextMessageType(MockServerConnection.ReadLineMessageType.REPOPULATE);
+
+        try {
+            String msg;
+            while ((msg = connection.readLine()) != null) {
+                ReceivedMessageHandler handler = MessageHandlerFactory.getHandler(msg, server.id);
+                handler.handleMessage();
+            }
+
+            AssertAudioSessionListsEqual(connection.sessions, audioSessions.getAudioSessionListCopy());
+            Assert.assertTrue(connection.sessions.size() == MockServerConnection.repopulateApplicationCount);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test_editSession(){
+        setup();
+
+        connection.addNextMessageType(MockServerConnection.ReadLineMessageType.ADD);
+        connection.addNextMessageType(MockServerConnection.ReadLineMessageType.EDIT);
+
+        AudioSession afterImg = null;
+        AudioSession afterEdit = null;
+
+        try {
+            String msg;
+            while ((msg = connection.readLine()) != null) {
+                ReceivedMessageHandler handler = MessageHandlerFactory.getHandler(msg, server.id);
+                handler.handleMessage();
+
+                if(handler instanceof AddImageToAudioSessionMessageHandler)
+                {
+                    afterImg = audioSessions.getAudioSessionListCopy().get(0);
+                }
+                else if(handler instanceof EditAudioSessionMessageHandler)
+                {
+                    afterEdit = audioSessions.getAudioSessionListCopy().get(0);
+                }
+            }
+
+            Assert.assertTrue(afterImg != null  && afterEdit != null);
+            Assert.assertTrue(!afterEdit.title.equals(afterImg.title));
         }
         catch (IOException e)
         {

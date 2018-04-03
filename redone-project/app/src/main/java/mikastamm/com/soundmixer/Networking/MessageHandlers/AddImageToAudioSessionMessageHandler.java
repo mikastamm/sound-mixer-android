@@ -48,4 +48,6 @@ public class AddImageToAudioSessionMessageHandler implements ReceivedMessageHand
             sessions.setAudioSessionImage(icon);
         }
     }
+
+
 }

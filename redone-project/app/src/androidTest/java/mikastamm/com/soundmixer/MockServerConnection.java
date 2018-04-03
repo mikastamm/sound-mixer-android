@@ -58,8 +58,15 @@ public class MockServerConnection implements ServerConnection {
         }
         else if(messageType == ReadLineMessageType.REMOVE)
         {
-            String json = Json.serialize(sessions.get(0));
-            sessions.remove(0);
+            String json;
+            if(sessions.size() != 0) {
+                json = Json.serialize(sessions.get(0));
+                sessions.remove(0);
+            }
+            else
+                json = Json.serialize(AndroidMockDataFactory.getAudioSessions(1).get(0));
+
+
             return "DEL" + json;
         }
         else if(messageType == ReadLineMessageType.EDIT)

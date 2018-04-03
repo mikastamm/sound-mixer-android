@@ -1,7 +1,5 @@
 package mikastamm.com.soundmixer;
 
-import android.provider.MediaStore;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,9 +75,11 @@ public class ClientAudioSessions {
 
     public void clearAudioSessions()
     {
-        for(AudioSession s : audioSessions)
+        List<AudioSession> clearedSessions = new ArrayList<AudioSession>(audioSessions);
+        audioSessions.clear();
+
+        for(AudioSession s : clearedSessions)
         {
-            audioSessions.remove(s);
             listener.onAudioSessionRemoved(s);
         }
     }
