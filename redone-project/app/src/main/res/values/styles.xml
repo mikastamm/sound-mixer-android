@@ -1,11 +1,35 @@
 <resources>
-
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/TextView</item>
     </style>
 
+    <style name="TwoWayView">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="TextView" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorText</item>
+    </style>
+
+
+    <!--Night mode theme-->
+
+    <style name="AppThemeNight" parent="Theme.AppCompat.Light">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/TextViewNight</item>
+        <item name="android:windowBackground">@color/colorBackgroundNight</item>
+        <item name="android:colorBackground">@color/colorBackgroundNight</item>
+    </style>
+
+    <style name="TextViewNight" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/colorTextNight</item>
+    </style>
 </resources>

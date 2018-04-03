@@ -57,6 +57,7 @@ public class ServerListeners {
 
     public void onServerConnected(Server server)
     {
+        server.state = ServerState.connected;
         for (ServerStateChangeListener listener : serverStateChangeListeners) {
             listener.onServerConnected(server);
         }
@@ -64,6 +65,7 @@ public class ServerListeners {
 
     public void onServerDisconnected(Server server)
     {
+        server.state = ServerState.available;
         for (ServerStateChangeListener listener : serverStateChangeListeners) {
             listener.onServerDisconnected(server);
         }
@@ -71,6 +73,7 @@ public class ServerListeners {
 
     public void onActiveServerChanged(Server oldActive, Server newActive)
     {
+        newActive.state = ServerState.active;
         for (ServerStateChangeListener listener : serverStateChangeListeners) {
             listener.onActiveServerChanged(oldActive, newActive);
         }

@@ -65,6 +65,7 @@ public class SocketServerConnection implements ServerConnection {
     @Override
     public void dispose() {
         Log.i(this.getClass().toString(), "Closing connection to " + ipAddress);
+        connected = false;
 
         if(outWriter != null) {
             outWriter.flush();
