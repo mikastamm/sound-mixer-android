@@ -12,12 +12,12 @@ import mikastamm.com.soundmixer.R;
  * Created by Mika on 03.04.2018.
  */
 
-public class ServerDrawerFragment extends Fragment {
+public class VolumeSlidersFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.server_drawer, container, false);
+        return inflater.inflate(R.layout.volume_slider_fragment, container, false);
     }
 
 }

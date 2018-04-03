@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/settings_app_category">
+        <CheckBoxPreference
+            android:key="pref_key_reduce_sensitivity"
+            android:title="@string/settings_app_reduce_sensitivity"
+            android:summary="@string/settings_app_reduce_sensitivity_description"/>
+        <!--<CheckBoxPreference
+            android:key="pref_key_revert_values"
+            android:title="@string/settings_app_revert_values"
+            android:summary="@string/settings_app_revert_values_description"/>-->
+        <CheckBoxPreference
+            android:key="pref_key_auto_connect_last"
+            android:title="@string/settings_app_auto_connect_last"
+            android:defaultValue="true"/>
+        <CheckBoxPreference
+            android:key="pref_key_auto_connect_open"
+            android:title="@string/settings_app_auto_connect_open"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/settings_ui_category">
+        <CheckBoxPreference
+            android:key="pref_key_nightmode"
+            android:title="@string/settings_ui_night_mode"/>
+        <CheckBoxPreference
+            android:key="pref_key_fullscreen"
+            android:title="@string/settings_ui_fullscreen"/>
+        <ListPreference
+            android:key="pref_key_orientation"
+            android:title="Orientation"
+            android:summary="%s"
+            android:entries="@array/orientations"
+            android:entryValues="@array/orientations"
+            android:defaultValue="0" />
+        <!--  <CheckBoxPreference
+              android:key="pref_key_hide_application_icon"
+              android:title="@string/settings_ui_hide_application_icon"
+              android:summary="@string/settings_ui_hide_application_icon_description"/>-->
+        <CheckBoxPreference
+            android:key="pref_key_show_ip"
+            android:title="@string/settings_ui_show_ip"/>
+    </PreferenceCategory>
+</PreferenceScreen>
