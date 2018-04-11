@@ -29,7 +29,7 @@
         <ListPreference
             android:key="pref_key_orientation"
             android:title="Orientation"
-            android:summary="%s"
+            android:summary="%socket"
             android:entries="@array/orientations"
             android:entryValues="@array/orientations"
             android:defaultValue="0" />

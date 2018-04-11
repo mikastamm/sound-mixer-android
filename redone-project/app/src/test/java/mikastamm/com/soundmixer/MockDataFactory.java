@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
+import mikastamm.com.soundmixer.Datamodel.Server;
 
 /**
  * Created by Mika on 27.03.2018.
@@ -34,7 +35,7 @@ public class MockDataFactory {
         return res;
     }
 
-    private static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+
     private static int currentAudioSessionId = 0;
     public static List<AudioSession> getAudioSessions(int count)
     {
@@ -47,15 +48,40 @@ public class MockDataFactory {
             s.volume = r.nextFloat() * 100;
 
             int nameLen = r.nextInt() % 7 + 1;
-            for (int j = 0; j < nameLen; j++)
-            {
-                s.title += chars[r.nextInt() % chars.length];
-            }
+            s.title = getRandomString(nameLen);
             s.id = Integer.toString(currentAudioSessionId);
             currentAudioSessionId++;
 
             sessions.add(s);
         }
         return sessions;
+    }
+
+    public static List<Server> getServer(int count)
+    {
+        Random r = new Random();
+        List<Server> servers = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Server s = new Server();
+            s.name = getRandomString(6);
+            s.hasPassword = false;
+            s.id = getRSAKeys(1)[0];
+            s.ipAddress = "192.168.0."+Integer.toString(i);
+            servers.add(s);
+        }
+        return servers;
+    }
+
+    private static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+    public static String getRandomString(int len)
+    {
+        Random r = new Random();
+        StringBuilder s = new StringBuilder();
+        for (int j = 0; j < len; j++)
+        {
+            int index = Math.abs(r.nextInt() % chars.length);
+            s.append(chars[index]);
+        }
+        return s.toString();
     }
 }

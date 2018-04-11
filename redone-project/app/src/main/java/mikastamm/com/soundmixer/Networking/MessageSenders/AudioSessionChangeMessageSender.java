@@ -4,6 +4,7 @@ import android.util.Log;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Helpers.Json;
+import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.Networking.MessageHandlerFactory;
 import mikastamm.com.soundmixer.Networking.ServerConnection;
 
@@ -23,10 +24,10 @@ public class AudioSessionChangeMessageSender implements MessageSender{
             if(connection != null && connection.isConnected())
             {
                 connection.writeLine(messageTag + Json.serialize(changedSession));
-                Log.i(this.getClass().getSimpleName(), "Sent AudioSession Change of " + changedSession.title);
+                Log.i(MainActivity.TAG, "Sent AudioSession Change of " + changedSession.title);
             }
             else
-                Log.i(this.getClass().getSimpleName(), "Server Connection Object is null or not connected");
+                Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
         }
     };
 

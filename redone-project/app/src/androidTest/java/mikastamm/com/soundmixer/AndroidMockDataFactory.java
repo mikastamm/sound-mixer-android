@@ -106,7 +106,7 @@ public class AndroidMockDataFactory {
     }
 
     private static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-    private static String getRandomString(int len)
+    public static String getRandomString(int len)
     {
         Random r = new Random();
         StringBuilder s = new StringBuilder();
@@ -127,7 +127,7 @@ public class AndroidMockDataFactory {
             s.name = getRandomString(6);
             s.hasPassword = false;
             s.id = getRSAKeys(1)[0];
-            s.IPAddress = "192.168.0."+Integer.toString(i);
+            s.ipAddress = "192.168.0."+Integer.toString(i);
             servers.add(s);
         }
         return servers;

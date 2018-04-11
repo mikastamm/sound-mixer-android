@@ -5,6 +5,7 @@ import java.util.List;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.AudioSessionIcon;
+import mikastamm.com.soundmixer.Helpers.ImageEncodingFactory;
 
 public class ClientAudioSessions {
     public String ownerClientId;

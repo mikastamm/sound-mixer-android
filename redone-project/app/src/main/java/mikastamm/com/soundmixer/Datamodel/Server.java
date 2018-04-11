@@ -9,24 +9,24 @@ import mikastamm.com.soundmixer.ServerState;
 public class Server {
     public String name;
     public boolean hasPassword;
-    public String IPAddress;
+    public String ipAddress;
     public String savedPassword;
     public String id;
     public ServerState state = ServerState.available;
 
-    public Server(boolean hasPassword, String name, String IPAddress, String savedPassword, String id)
+    public Server(boolean hasPassword, String name, String ipAddress, String savedPassword, String id)
     {
         this.name = name;
-        this.IPAddress = IPAddress;
+        this.ipAddress = ipAddress;
         this.savedPassword = savedPassword;
         this.hasPassword = hasPassword;
         this.id = id;
     }
 
-    public Server(boolean hasPassword, String name, String IPAddress, String id)
+    public Server(boolean hasPassword, String name, String ipAddress, String id)
     {
         this.name = name;
-        this.IPAddress = IPAddress;
+        this.ipAddress = ipAddress;
         this.savedPassword = "";
         this.hasPassword = hasPassword;
         this.id = id;
@@ -38,7 +38,7 @@ public class Server {
 
     @Override
     public String toString(){
-        return "\nName="+name+"\nhasPassword="+hasPassword+"\nIPAddress="+IPAddress+"\nsavedPassword="+ savedPassword +"\nid="+ id;
+        return "\nName="+name+"\nhasPassword="+hasPassword+"\nipAddress="+ ipAddress +"\nsavedPassword="+ savedPassword +"\nid="+ id;
     }
 
     @Override
@@ -51,5 +51,17 @@ public class Server {
         else {
             return super.equals(o);
         }
+    }
+
+    //Returns an integer representation of the server id
+    public int getIntegerServerId()
+    {
+        int intId = 0;
+        for(int i=0;i< id.length();i++)
+        {
+            char c=id.charAt(i);
+            intId += Character.getNumericValue(c);
+        }
+        return intId;
     }
 }

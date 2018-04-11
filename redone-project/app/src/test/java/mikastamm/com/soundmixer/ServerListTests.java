@@ -1,6 +1,10 @@
 package mikastamm.com.soundmixer;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
+
+import java.util.List;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
 
@@ -90,5 +94,25 @@ public class ServerListTests {
         assertTrue(discovered == 10);
         emptyServerList();
         assertTrue(lost == 10);
+    }
+
+    @Test
+    public void test_iterateServers(){
+        int sCount = 10;
+        ServerList sl = ServerList.getInstance();
+        int initCount = sl.size();
+        List<Server> servers = MockDataFactory.getServer(sCount);
+
+        for (int i = 0; i < sCount; i++) {
+            sl.addServer(servers.get(i));
+        }
+
+        int loopCount = 0;
+        for(Server s : ServerList.getInstance())
+        {
+            loopCount++;
+        }
+
+        Assert.assertTrue(loopCount == initCount + sCount);
     }
 }

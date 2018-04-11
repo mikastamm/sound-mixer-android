@@ -29,6 +29,7 @@
     <string name="main_menu_feedback">Give us feedback</string>
     <string name="main_menu_how_to_use">Getting started</string>
     <string name="main_menu_settings">Settings</string>
+    <string name="main_menu_servers_submenu">Computers</string>
 
     <string name="download_server_at">Get it here:</string>
     <string name="first_use_dialog_main_text">To properly use this app you have to install the Windows Application on the computers you want to remote control</string>

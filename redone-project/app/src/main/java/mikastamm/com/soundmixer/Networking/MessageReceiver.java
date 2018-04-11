@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
+import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.ReceivedMessageHandler;
 import mikastamm.com.soundmixer.ServerList;
 import mikastamm.com.soundmixer.ServerState;
@@ -35,12 +36,12 @@ public class MessageReceiver {
                    if(handler != null)
                        handler.handleMessage();
                    else
-                       Log.e(this.getClass().getSimpleName(), "Received unknown message " + msg);
+                       Log.e(MainActivity.TAG, "Received unknown message " + msg);
                 }
             }
             catch (IOException e){e.printStackTrace();}
             finally {
-                Log.i(this.getClass().getSimpleName(), "Connection to server " + server.name + " lost");
+                Log.i(MainActivity.TAG, "Connection to server " + server.name + " lost");
                 connection.dispose();
                 ServerList.getInstance().listeners.onServerDisconnected(server);
             }

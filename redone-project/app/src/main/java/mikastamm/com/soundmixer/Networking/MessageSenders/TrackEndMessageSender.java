@@ -2,6 +2,7 @@ package mikastamm.com.soundmixer.Networking.MessageSenders;
 
 import android.util.Log;
 
+import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.Networking.ServerConnection;
 
 /**
@@ -20,10 +21,10 @@ public class TrackEndMessageSender implements MessageSender {
             if(connection != null && connection.isConnected())
             {
                 connection.writeLine(messageTag + trackedSessionId);
-                Log.i(this.getClass().getSimpleName(), "Stopped tracking " + trackedSessionId);
+                Log.i(MainActivity.TAG, "Stopped tracking " + trackedSessionId);
             }
             else
-                Log.i(this.getClass().getSimpleName(), "Server Connection Object is null or not connected");
+                Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
         }
     };
 

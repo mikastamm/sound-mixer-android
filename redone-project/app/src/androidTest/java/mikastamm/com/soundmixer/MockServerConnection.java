@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.AudioSessionIcon;
+import mikastamm.com.soundmixer.Helpers.ImageEncoding;
+import mikastamm.com.soundmixer.Helpers.ImageEncodingFactory;
 import mikastamm.com.soundmixer.Helpers.Json;
 import mikastamm.com.soundmixer.Networking.ServerConnection;
 

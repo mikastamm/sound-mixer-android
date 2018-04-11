@@ -18,7 +18,7 @@ public class ServerConnectionFactory {
     {
         if(type == ConnectionType.Socket)
         {
-            SocketServerConnection conn = new SocketServerConnection(server.IPAddress);
+            SocketServerConnection conn = new SocketServerConnection(server);
             return conn;
         }
         return null;

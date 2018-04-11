@@ -9,6 +9,8 @@ import java.util.List;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.Server;
+import mikastamm.com.soundmixer.Helpers.ImageEncoding;
+import mikastamm.com.soundmixer.Helpers.ImageEncodingFactory;
 import mikastamm.com.soundmixer.Networking.MessageHandlerFactory;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.AddImageToAudioSessionMessageHandler;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.EditAudioSessionMessageHandler;

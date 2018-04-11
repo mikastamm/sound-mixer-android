@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
 import mikastamm.com.soundmixer.R;
 
 /**
@@ -13,6 +14,20 @@ import mikastamm.com.soundmixer.R;
  */
 
 public class VolumeSlidersFragment extends Fragment {
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

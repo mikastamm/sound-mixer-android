@@ -10,13 +10,15 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import mikastamm.com.soundmixer.Datamodel.Server;
+import mikastamm.com.soundmixer.MainActivity;
+
 /**
  * Created by Mika on 28.03.2018.
  */
 
 public class SocketServerConnection implements ServerConnection {
-
-    private String ipAddress;
+    private Server server;
 
     private Socket socket;
     private BufferedReader inFromServer;
@@ -25,9 +27,15 @@ public class SocketServerConnection implements ServerConnection {
 
     private boolean connected = false;
 
-    public SocketServerConnection(String ipAddress)
+    public SocketServerConnection(Server server)
     {
-        this.ipAddress = ipAddress;
+        this.server = server;
+    }
+    public SocketServerConnection(Server server, Socket socket){this.socket = socket; this.server = server;}
+
+    @Override
+    public Server getServer(){
+        return server;
     }
 
     @Override
@@ -48,9 +56,11 @@ public class SocketServerConnection implements ServerConnection {
 
     @Override
     public void connect() {
-        Log.i(this.getClass().toString(), "Establishing connection to " + ipAddress);
+        Log.i(MainActivity.TAG, "Establishing connection to " + server.ipAddress);
         try{
-            socket = new Socket(InetAddress.getByName(ipAddress), Constants.SERVER_CONNECTION_TCP_PORT);
+            if(socket == null)
+            socket = new Socket(InetAddress.getByName(server.ipAddress), Constants.SERVER_CONNECTION_TCP_PORT);
+
             inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outstream = socket.getOutputStream();
             outWriter = new PrintWriter(outstream);
@@ -64,7 +74,7 @@ public class SocketServerConnection implements ServerConnection {
 
     @Override
     public void dispose() {
-        Log.i(this.getClass().toString(), "Closing connection to " + ipAddress);
+        Log.i(MainActivity.TAG, "Closing connection to " + server.ipAddress);
         connected = false;
 
         if(outWriter != null) {

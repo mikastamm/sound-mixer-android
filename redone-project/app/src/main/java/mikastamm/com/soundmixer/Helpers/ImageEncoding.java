@@ -1,4 +1,4 @@
-package mikastamm.com.soundmixer;
+package mikastamm.com.soundmixer.Helpers;
 
 import android.graphics.Bitmap;
 

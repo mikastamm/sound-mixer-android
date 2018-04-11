@@ -1,8 +1,9 @@
 package mikastamm.com.soundmixer.Networking;
 
-import java.io.IOException;
+import android.util.Log;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
+import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.ServerList;
 
 /**
@@ -18,31 +19,46 @@ public class ServerLogic {
         this.server = server;
     }
 
-    public ServerLogic(Server server, ServerConnection connection){
-        this.server = server;
-        this.connection = connection;
-    }
-
     public void dispose(){
         receiver.stopReceiveing();
     }
 
     public void ConnectAndStartCommunicating(){
-        establishConnection();
+        connect();
         receiver = new MessageReceiver(connection, server);
-        receiver.startReceiveing();
+        //Receive in new Thread
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                receiver.startReceiveing();
+            }
+        }).start();
     }
 
-    public void establishConnection(){
+    public void connect(){
+        //If a ServerConnection already exists use it else establish a new connection
+        connection = ServerConnectionList.getInstance().get(server.id);
         if(connection == null) {
             connection = new ServerConnectionFactory(ServerConnectionFactory.ConnectionType.Socket).makeConnection(server);
+            ServerConnectionList.getInstance().add(connection);
         }
 
-        if(!connection.isConnected())
-            connection.connect();
+        if(!connection.isConnected()) {
+            //Connect on new Thread
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    connection.connect();
+                }
+            }).start();
+        }
 
-        if(connection.isConnected())
+        ServerList.getInstance().setActiveServer(server);
+
+        if(connection.isConnected()) {
             ServerList.getInstance().listeners.onServerConnected(server);
+            Log.i(MainActivity.TAG, "Server " + server.name + " now connected & active");
+        }
     }
 
 
