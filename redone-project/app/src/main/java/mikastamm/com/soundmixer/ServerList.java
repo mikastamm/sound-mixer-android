@@ -1,7 +1,6 @@
 package mikastamm.com.soundmixer;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +41,7 @@ public class ServerList implements Iterable<Server>{
             synchronized (servers) {
                 servers.put(server.id, server);
             }
-            listeners.onServerDiscovered(server);
+            listeners.serverDiscovered(server);
         }
         catch (InvalidServerException ex)
         {
@@ -57,7 +56,7 @@ public class ServerList implements Iterable<Server>{
             synchronized (servers) {
                 servers.remove(server.id);
             }
-            listeners.onServerLost(server);
+            listeners.serverLost(server);
         }
          catch (InvalidServerException ex)
         {
@@ -75,13 +74,18 @@ public class ServerList implements Iterable<Server>{
         try {
             validateServer(newActive);
 
-            final Server oldActive = active;
-            if (active != null)
-                active.state = ServerState.connected;
+            Server oldActive = active;
+
+            if(oldActive != null && oldActive.id.equals(newActive.id))
+                oldActive = null;
+
+            if (oldActive != null)
+                oldActive.state = ServerState.connected;
+
             active = newActive;
             active.state = ServerState.active;
 
-            listeners.onActiveServerChanged(oldActive, newActive);
+            listeners.activeServerChanged(oldActive, newActive);
 
         }
         catch (InvalidServerException ex)
@@ -90,8 +94,18 @@ public class ServerList implements Iterable<Server>{
         }
     }
 
+    public void removeActiveServer(){
+        active.state = ServerState.connected;
+        Server oldActive = active;
+        active = null;
+        listeners.activeServerChanged(oldActive, null);
+    }
+
     private void validateServer(Server server) throws InvalidServerException
     {
+        if(server == null)
+            throw new InvalidServerException("Server is null");
+
         if(server.id == null)
             throw new InvalidServerException("Id is null");
 

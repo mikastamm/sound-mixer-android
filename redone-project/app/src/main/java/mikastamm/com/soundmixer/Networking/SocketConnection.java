@@ -14,11 +14,11 @@ import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.MainActivity;
 
 /**
- * Created by Mika on 28.03.2018.
+ * Created by Mika on 17.04.2018.
  */
 
-public class SocketServerConnection implements ServerConnection {
-    private Server server;
+public class SocketConnection implements Connection {
+    private String ipAddress;
 
     private Socket socket;
     private BufferedReader inFromServer;
@@ -27,16 +27,11 @@ public class SocketServerConnection implements ServerConnection {
 
     private boolean connected = false;
 
-    public SocketServerConnection(Server server)
+    public SocketConnection(String ipAddress)
     {
-        this.server = server;
+        this.ipAddress = ipAddress;
     }
-    public SocketServerConnection(Server server, Socket socket){this.socket = socket; this.server = server;}
-
-    @Override
-    public Server getServer(){
-        return server;
-    }
+    public SocketConnection(Socket socket){this.socket = socket; this.ipAddress = socket.getInetAddress().getHostAddress();}
 
     @Override
     public void writeLine(String line) {
@@ -48,18 +43,15 @@ public class SocketServerConnection implements ServerConnection {
 
     @Override
     public String readLine() throws IOException {
-        if(inFromServer != null)
             return inFromServer.readLine();
-        else
-            return null;
     }
 
     @Override
     public void connect() {
-        Log.i(MainActivity.TAG, "Establishing connection to " + server.ipAddress);
+        Log.i(MainActivity.TAG, "Establishing connection to " + ipAddress);
         try{
             if(socket == null || socket.isClosed())
-            socket = new Socket(InetAddress.getByName(server.ipAddress), Constants.SERVER_CONNECTION_TCP_PORT);
+                socket = new Socket(InetAddress.getByName(ipAddress), Constants.SERVER_CONNECTION_TCP_PORT);
 
             inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outstream = socket.getOutputStream();
@@ -74,7 +66,7 @@ public class SocketServerConnection implements ServerConnection {
 
     @Override
     public void dispose() {
-        Log.i(MainActivity.TAG, "Closing connection to " + server.ipAddress);
+        Log.i(MainActivity.TAG, "Closing connection to " + ipAddress);
         connected = false;
 
         if(outWriter != null) {

@@ -15,26 +15,34 @@ public class ServerListeners {
         void onServerLost(Server server);
     }
 
-    public List<ServerListChangeListener> serverListChangeListeners = new ArrayList<>();
+    private final List<ServerListChangeListener> serverListChangeListeners = new ArrayList<>();
     public void addServerListChangeListener(ServerListChangeListener listener)
     {
-        serverListChangeListeners.add(listener);
+        synchronized (serverListChangeListeners) {
+            serverListChangeListeners.add(listener);
+        }
     }
 
     public void removeServerListChangeListener(ServerListChangeListener listener)
     {
-        serverStateChangeListeners.remove(listener);
-    }
-
-    public void onServerDiscovered(Server server){
-        for (ServerListChangeListener listener : serverListChangeListeners) {
-            listener.onServerDiscovered(server);
+        synchronized (serverListChangeListeners) {
+            serverStateChangeListeners.remove(listener);
         }
     }
 
-    public void onServerLost(Server server){
-        for (ServerListChangeListener listener : serverListChangeListeners) {
-            listener.onServerLost(server);
+    public void serverDiscovered(Server server){
+        synchronized (serverListChangeListeners) {
+            for (ServerListChangeListener listener : serverListChangeListeners) {
+                listener.onServerDiscovered(server);
+            }
+        }
+    }
+
+    public void serverLost(Server server){
+        synchronized (serverListChangeListeners) {
+            for (ServerListChangeListener listener : serverListChangeListeners) {
+                listener.onServerLost(server);
+            }
         }
     }
 
@@ -44,38 +52,50 @@ public class ServerListeners {
         void onActiveServerChanged(Server oldActive, Server newActive);
     }
 
-    public List<ServerStateChangeListener> serverStateChangeListeners = new ArrayList<>();
+    private final List<ServerStateChangeListener> serverStateChangeListeners = new ArrayList<>();
     public void addServerStateChangeListener(ServerStateChangeListener listener)
     {
-        serverStateChangeListeners.add(listener);
+        synchronized (serverStateChangeListeners) {
+            serverStateChangeListeners.add(listener);
+        }
     }
 
     public void removeServerChangeListener(ServerStateChangeListener listener)
     {
-        serverStateChangeListeners.remove(listener);
+        synchronized (serverStateChangeListeners) {
+            serverStateChangeListeners.remove(listener);
+        }
     }
 
-    public void onServerConnected(Server server)
+    public void serverConnected(Server server)
     {
         server.state = ServerState.connected;
-        for (ServerStateChangeListener listener : serverStateChangeListeners) {
-            listener.onServerConnected(server);
+        synchronized (serverStateChangeListeners) {
+            for (ServerStateChangeListener listener : serverStateChangeListeners) {
+                listener.onServerConnected(server);
+            }
         }
     }
 
-    public void onServerDisconnected(Server server)
+    public void serverDisconnected(Server server)
     {
         server.state = ServerState.available;
-        for (ServerStateChangeListener listener : serverStateChangeListeners) {
-            listener.onServerDisconnected(server);
+        synchronized (serverStateChangeListeners) {
+            for (ServerStateChangeListener listener : serverStateChangeListeners) {
+                listener.onServerDisconnected(server);
+            }
         }
     }
 
-    public void onActiveServerChanged(Server oldActive, Server newActive)
+    public void activeServerChanged(Server oldActive, Server newActive)
     {
+        if(newActive != null)
         newActive.state = ServerState.active;
-        for (ServerStateChangeListener listener : serverStateChangeListeners) {
-            listener.onActiveServerChanged(oldActive, newActive);
+
+        synchronized (serverStateChangeListeners) {
+            for (ServerStateChangeListener listener : serverStateChangeListeners) {
+                listener.onActiveServerChanged(oldActive, newActive);
+            }
         }
     }
 }

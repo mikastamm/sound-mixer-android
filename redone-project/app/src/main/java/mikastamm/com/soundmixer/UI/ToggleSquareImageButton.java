@@ -59,7 +59,10 @@ public class ToggleSquareImageButton extends AppCompatImageButton implements Vie
     public void setValue(boolean nval)
     {
         if(nval == value)
+        {
+            setBackground((nval ? trueDrawable : falseDrawable));
             return;
+        }
 
         value = nval;
 

@@ -31,10 +31,12 @@ public class FindServersRunnable implements Runnable {
     public int searchTimeoutMs = 3000;
     private String broadcastMessage = "VC_HELLO";
     private Activity activity;
+    private NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate delegate;
 
-    public FindServersRunnable(Activity activity)
+    public FindServersRunnable(Activity activity, NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate delegate)
     {
         this.activity = activity;
+        this.delegate = delegate;
     }
 
     @Override
@@ -55,7 +57,9 @@ public class FindServersRunnable implements Runnable {
         try {
             acceptSocketAndHandleNewConnection();
         } catch (IOException ioe) {
-            Log.i(MainActivity.TAG, "Network Discovery Finished (Timeout)");
+            //Notify the delegate that nd finished
+            //Delegate then calls all subscribed listeners
+            delegate.networkDiscoveryFinished();
         }
         finally {
             try {
@@ -68,6 +72,8 @@ public class FindServersRunnable implements Runnable {
 
     private void acceptSocketAndHandleNewConnection() throws IOException {
         serverSocket = new ServerSocket(Constants.NETWORK_DISCOVERY_TCP_PORT);
+
+        //Accept new clients until the timeout
         Date endDate = Calendar.getInstance().getTime();
         endDate.setTime(endDate.getTime() + searchTimeoutMs);
         while (Calendar.getInstance().getTime().getTime() < endDate.getTime()) {
@@ -104,7 +110,7 @@ public class FindServersRunnable implements Runnable {
     private InetAddress getBroadcastAddress() throws IOException {
         WifiManager wifi = (WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         DhcpInfo dhcp = wifi.getDhcpInfo();
-        // handle null somehow
+        //TODO: handle null somehow
 
         int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
         byte[] quads = new byte[4];

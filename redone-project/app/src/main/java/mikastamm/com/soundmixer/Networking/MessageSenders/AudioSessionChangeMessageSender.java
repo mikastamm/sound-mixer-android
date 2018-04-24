@@ -2,17 +2,19 @@ package mikastamm.com.soundmixer.Networking.MessageSenders;
 
 import android.util.Log;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Helpers.Json;
 import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.MessageHandlerFactory;
 import mikastamm.com.soundmixer.Networking.ServerConnection;
 
 /**
  * Created by Mika on 03.04.2018.
  */
 
-public class AudioSessionChangeMessageSender implements MessageSender{
+public class AudioSessionChangeMessageSender extends MessageSender{
     public static String messageTag = "EDIT";
 
     private ServerConnection connection;
@@ -28,12 +30,14 @@ public class AudioSessionChangeMessageSender implements MessageSender{
             }
             else
                 Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
+            startNextMessageSender();
         }
     };
 
     public AudioSessionChangeMessageSender(AudioSession changedSession, ServerConnection connection)
     {
-        this.changedSession = changedSession;
+        this.changedSession = changedSession.copy();
+        this.changedSession.icon = null;
         this.connection = connection;
     }
 
@@ -41,6 +45,5 @@ public class AudioSessionChangeMessageSender implements MessageSender{
     public void send(){
         new Thread(sendChangeRunnable).start();
     }
-
 
 }

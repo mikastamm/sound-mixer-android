@@ -64,9 +64,9 @@ public class ServerListTests {
         fillServerList();
         for(int i = 0; i < rsaKeys.length; i++) {
             Server server = list.getServer(rsaKeys[i]);
-            list.listeners.onServerConnected(server);
+            list.listeners.serverConnected(server);
             list.setActiveServer(server);
-            list.listeners.onServerDisconnected(server);
+            list.listeners.serverDisconnected(server);
         }
         assertThat(connected == 10, is(true));
         assertThat(disconnected == 10, is(true));

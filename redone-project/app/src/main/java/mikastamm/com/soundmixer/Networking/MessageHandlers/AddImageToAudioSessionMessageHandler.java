@@ -2,7 +2,6 @@ package mikastamm.com.soundmixer.Networking.MessageHandlers;
 
 import mikastamm.com.soundmixer.ClientAudioSessions;
 import mikastamm.com.soundmixer.ClientAudioSessionsManager;
-import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.AudioSessionIcon;
 import mikastamm.com.soundmixer.Helpers.Json;
 
@@ -35,7 +34,7 @@ public class AddImageToAudioSessionMessageHandler implements ReceivedMessageHand
             String jsonData = message.substring(messageTypeIdentifierPrefix.length());
             AudioSessionIcon[] icons = Json.deserialize(jsonData, AudioSessionIcon[].class);
 
-            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSession(serverId);
+            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
             for(AudioSessionIcon icon : icons) {
                 sessions.setAudioSessionImage(icon);
             }
@@ -44,7 +43,7 @@ public class AddImageToAudioSessionMessageHandler implements ReceivedMessageHand
             String jsonData = message.substring(messageTypeIdentifierPrefix.length());
             AudioSessionIcon icon = Json.deserialize(jsonData, AudioSessionIcon.class);
 
-            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSession(serverId);
+            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
             sessions.setAudioSessionImage(icon);
         }
     }

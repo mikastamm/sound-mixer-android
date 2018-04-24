@@ -1,11 +1,8 @@
 package mikastamm.com.soundmixer.Networking.MessageHandlers;
 
-import android.provider.MediaStore;
-
 import mikastamm.com.soundmixer.ClientAudioSessions;
 import mikastamm.com.soundmixer.ClientAudioSessionsManager;
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
-import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Helpers.Json;
 
 /**
@@ -29,7 +26,7 @@ public class AddAudioSessionMessageHandler implements ReceivedMessageHandler {
         String jsonData = message.substring(messageTypeIdentifierPrefix.length());
         AudioSession newSession = Json.deserialize(jsonData, AudioSession.class);
 
-        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSession(serverId);
+        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
         sessions.addAudioSession(newSession);
     }
 

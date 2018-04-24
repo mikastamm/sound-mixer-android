@@ -21,6 +21,7 @@ public class KnownServerList {
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString(LastConnectedServerPrefKey, serverId);
         edit.apply();
+        addToKnown(serverId, activity);
     }
 
     public static boolean isKnown(String RSAKey, Activity activity)
@@ -31,13 +32,21 @@ public class KnownServerList {
         return knownServers.contains(RSAKey);
     }
 
-    public static void addToKnown(String RSAKey, Activity activity)
+    public static boolean isLastConnected(String RSAKey, Activity activity)
+    {
+        SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
+        String lastConnected = prefs.getString(LastConnectedServerPrefKey, "");
+
+        return lastConnected.equals(RSAKey);
+    }
+
+    public static void addToKnown(String serverId, Activity activity)
     {
         SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor edit = prefs.edit();
         Set<String> knownServers = prefs.getStringSet(KnownServersPrefKey, new HashSet<String>());
-        if(!knownServers.contains(RSAKey))
-            knownServers.add(RSAKey);
+        if(!knownServers.contains(serverId))
+            knownServers.add(serverId);
 
         edit.putStringSet(KnownServersPrefKey, knownServers);
         edit.apply();

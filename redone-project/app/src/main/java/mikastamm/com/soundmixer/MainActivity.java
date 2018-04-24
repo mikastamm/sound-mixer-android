@@ -1,6 +1,8 @@
 package mikastamm.com.soundmixer;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,8 +15,11 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
+import mikastamm.com.soundmixer.Networking.ServerConnectionList;
 import mikastamm.com.soundmixer.Networking.ServerLogic;
+import mikastamm.com.soundmixer.UI.GettingStartedFragment;
 import mikastamm.com.soundmixer.UI.NavigationViewPresenter;
 import mikastamm.com.soundmixer.UI.ServerPresenter;
 import mikastamm.com.soundmixer.UI.SettingsFragment;
@@ -28,9 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Sends broadcast and receives response from all available servers in the network
     public NetworkDiscoveryBroadcastSender ndSender;
-    //Provides a handle for the active server to send, receive and handle data
-    //the active server is the one that's currently displayed one the main screen (VolumeSlidersFragment)
-    public ServerLogic activeServerLogic;
+
 
     private final Class<? extends Fragment> homeFragment = VolumeSlidersFragment.class;
 
@@ -38,13 +41,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setDisplayedFragment(homeFragment, getString(R.string.app_name));
+
+
+        ndSender = new NetworkDiscoveryBroadcastSender(this);
+
+        GettingStartedFragment fragment = new GettingStartedFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fgGettingStarted, fragment).commit();
 
         navigationViewPresenter = new NavigationViewPresenter(this);
         serverPresenter = new ServerPresenter(this, navigationViewPresenter.navigationView);
 
-        //Networking
-        ndSender = new NetworkDiscoveryBroadcastSender(this);
         ndSender.searchForServers();
     }
 
@@ -55,26 +61,48 @@ public class MainActivity extends AppCompatActivity {
         ndSender.stopSearch();
     }
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        ServerConnectionList.getInstance().disconnectAndClear();
+    }
+
+    public void connect(final Server s)
+    {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setDisplayedFragment(VolumeSlidersFragment.newInstanceAndConnect(s), s.name);
+            }
+        });
+    }
+
+    public void setDisplayedFragment(Fragment fragment, String newTitle)
+    {
+        // Insert the fragment by replacing any existing fragment
+        if(fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction tx = fragmentManager.beginTransaction().replace(R.id.flContent, fragment);
+
+            if(!fragment.getClass().equals(homeFragment))
+                tx.addToBackStack(fragment.getClass().getSimpleName());
+
+            tx.commit();
+            setTitle(newTitle);
+        }
+    }
+
     public void setDisplayedFragment(Class<? extends Fragment> fragmentClass, String newTitle)
     {
         Fragment fragment = null;
+
         try {
             fragment = fragmentClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Insert the fragment by replacing any existing fragment
-        if(fragment != null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction tx = fragmentManager.beginTransaction().replace(R.id.flContent, fragment);
-
-            if(!fragmentClass.equals(homeFragment))
-                tx.addToBackStack(fragmentClass.getSimpleName());
-
-            tx.commit();
-            setTitle(newTitle);
-        }
+        setDisplayedFragment(fragment, newTitle);
     }
 
     @Override

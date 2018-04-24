@@ -29,7 +29,7 @@ public class MessageHandlerTests {
     {
         server = AndroidMockDataFactory.getServer(1).get(0);
         ServerList.getInstance().addServer(server);
-        audioSessions = ClientAudioSessionsManager.registerClientAudioSession(server.id);
+        audioSessions = ClientAudioSessionsManager.registerClientAudioSessions(server.id);
         connection = new MockServerConnection();
     }
 

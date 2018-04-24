@@ -67,19 +67,43 @@ public class NavigationViewPresenter {
                 mainActivity.ndSender.searchForServers();
                 break;
             case R.id.nav_info:
-                //TODO: Implement Info
+                drawerLayout.closeDrawers();
+                toggleGettingStartedOverlay();
                 break;
             case R.id.nav_settings:
                 mainActivity.setDisplayedFragment(SettingsFragment.class, mainActivity.getString(R.string.title_activity_settings));
+                drawerLayout.closeDrawers();
                 break;
             case R.id.nav_feedback:
                 //TODO: Implement Feedback
                 break;
             default:
                 selectClickedServer(menuItem);
+                drawerLayout.closeDrawers();
         }
 
-        drawerLayout.closeDrawers();
+
+    }
+
+    private void toggleGettingStartedOverlay(){
+        final int showAfter = 200;
+        final GettingStartedFragment fragment = (GettingStartedFragment)mainActivity.getSupportFragmentManager().findFragmentById(R.id.fgGettingStarted);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(showAfter);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fragment.toggle();
+                    }
+                });
+            }
+        }).start();
     }
 
     private void selectClickedServer(MenuItem menuItem){
@@ -87,8 +111,7 @@ public class NavigationViewPresenter {
         {
             if(menuItem.getItemId() == s.getIntegerServerId())
             {
-                mainActivity.activeServerLogic = new ServerLogic(s);
-                mainActivity.activeServerLogic.connect();
+                mainActivity.connect(s);
             }
         }
     }

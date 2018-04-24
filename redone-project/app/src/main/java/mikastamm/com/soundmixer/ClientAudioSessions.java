@@ -6,32 +6,38 @@ import java.util.List;
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.AudioSessionIcon;
 import mikastamm.com.soundmixer.Helpers.ImageEncodingFactory;
+import mikastamm.com.soundmixer.UI.AudioSessionViewModel;
+import mikastamm.com.soundmixer.UI.VolumeSlidersFragment;
 
 public class ClientAudioSessions {
     public String ownerClientId;
-    public AudioSessionListener listener;
+    public AudioSessionDelegate listener;
 
     private List<AudioSession> audioSessions = new ArrayList<>();
 
     public ClientAudioSessions(){
-        listener = new AudioSessionListener();
+        listener = new AudioSessionDelegate();
     }
 
     public void addAudioSession(AudioSession session)
     {
         audioSessions.add(session);
-        listener.onAudioSessionAdded(session);
+        listener.audioSessionAdded(session);
     }
 
     public void addAudioSessions(AudioSession[] sessions)
     {
         for(AudioSession session : sessions) {
             audioSessions.add(session);
-            listener.onAudioSessionAdded(session);
+            listener.audioSessionAdded(session);
         }
     }
 
-    public void editAudioSession(AudioSession newValues)
+    public AudioSessionViewModel getViewModel(VolumeSlidersFragment fragment){
+        return new AudioSessionViewModel(audioSessions, listener, fragment);
+    }
+
+    public void updateAudioSession(AudioSession newValues)
     {
         AudioSession oldValues;
 
@@ -42,7 +48,7 @@ public class ClientAudioSessions {
                 oldValues = s.copy();
                 s.updateValues(newValues);
 
-                listener.onAudioSessionEdited(oldValues, s);
+                listener.audioSessionEdited(oldValues, s);
                 break;
             }
         }
@@ -50,9 +56,14 @@ public class ClientAudioSessions {
 
     public void setAudioSessionImage(AudioSessionIcon img)
     {
-        AudioSession s = getAudioSession(img.id).copy();
-        s.icon = ImageEncodingFactory.getStandardEncoding().decode(img.icon);
-        editAudioSession(s);
+        AudioSession newS = getAudioSession(img.id);
+
+        if(newS == null)
+            return;
+
+        AudioSession old = newS.copy();
+        newS.icon = ImageEncodingFactory.getStandardEncoding().decode(img.icon);
+        listener.audioSessionEdited(old, newS);
     }
 
     public void removeAudioSession(String id){
@@ -70,7 +81,7 @@ public class ClientAudioSessions {
         if(del != null)
         {
             audioSessions.remove(del);
-            listener.onAudioSessionRemoved(del);
+            listener.audioSessionRemoved(del);
         }
     }
 
@@ -81,7 +92,7 @@ public class ClientAudioSessions {
 
         for(AudioSession s : clearedSessions)
         {
-            listener.onAudioSessionRemoved(s);
+            listener.audioSessionRemoved(s);
         }
     }
 

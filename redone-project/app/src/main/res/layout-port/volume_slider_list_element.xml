@@ -16,7 +16,7 @@
         android:id="@+id/frlShadowContainer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorBackground"
+        android:background="@drawable/volume_slider_bg"
         android:elevation="3dp">
         <LinearLayout
             android:layout_width="fill_parent"
@@ -53,7 +53,7 @@
                     android:layout_height="30dp"
                     android:layout_gravity="center"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/ic_audio"
+                    android:background="@drawable/ic_application"
                     />
             </LinearLayout>
             <LinearLayout

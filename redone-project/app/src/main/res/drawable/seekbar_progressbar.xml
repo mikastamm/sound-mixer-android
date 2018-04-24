@@ -22,14 +22,14 @@
             <shape android:shape="rectangle" >
                 <stroke android:width="5dp" android:color="#00ffffff"/>
                 <corners android:radius="15dp" />
-
-                <gradient
+                <solid android:color="@color/colorAccent"/>
+              <!--  <gradient
                     android:angle="270"
                     android:startColor="#d97425"
                     android:centerColor="#FFD54F"
                     android:endColor="#FFD54F"
                     android:centerY="0.2"
-                    android:type="linear" />
+                    android:type="linear" />-->
 
 
             </shape>

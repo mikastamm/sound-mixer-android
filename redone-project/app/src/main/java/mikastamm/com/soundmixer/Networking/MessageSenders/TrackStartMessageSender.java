@@ -2,8 +2,9 @@ package mikastamm.com.soundmixer.Networking.MessageSenders;
 
 import android.util.Log;
 
-import mikastamm.com.soundmixer.Datamodel.AudioSession;
-import mikastamm.com.soundmixer.Helpers.Json;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.Networking.ServerConnection;
 
@@ -11,7 +12,7 @@ import mikastamm.com.soundmixer.Networking.ServerConnection;
  * Created by Mika on 03.04.2018.
  */
 
-public class TrackStartMessageSender implements MessageSender {
+public class TrackStartMessageSender extends MessageSender {
     public static String messageTag = "TRACK";
 
     private ServerConnection connection;
@@ -27,6 +28,8 @@ public class TrackStartMessageSender implements MessageSender {
             }
             else
                 Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
+
+            startNextMessageSender();
         }
     };
 
@@ -40,4 +43,5 @@ public class TrackStartMessageSender implements MessageSender {
     public void send(){
         new Thread(sendTrackStartRunnable).start();
     }
+
 }

@@ -16,11 +16,11 @@ import mikastamm.com.soundmixer.ServerList;
 
 public class GetInfoFromServerRunnable implements Runnable {
     private Socket socket;
-    private ServerConnection connection;
+    private Connection connection;
 
     public GetInfoFromServerRunnable(Socket socket){
         this.socket = socket;
-        connection = new SocketServerConnection(new Server(), socket);
+        connection = new ConnectionFactory().makeConnection(socket);
     }
 
     @Override
@@ -43,9 +43,12 @@ public class GetInfoFromServerRunnable implements Runnable {
 
             if(server != null)
             {
+                server.ipAddress = socket.getInetAddress().getHostAddress();
                 ServerList.getInstance().addServer(server);
                 Log.i("sound-mixer-log", "Discovered " + server.name);
             }
         }
+
+        connection.dispose();
     }
 }

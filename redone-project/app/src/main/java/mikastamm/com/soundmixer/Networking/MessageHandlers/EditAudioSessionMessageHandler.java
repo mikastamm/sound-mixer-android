@@ -3,7 +3,6 @@ package mikastamm.com.soundmixer.Networking.MessageHandlers;
 import mikastamm.com.soundmixer.ClientAudioSessions;
 import mikastamm.com.soundmixer.ClientAudioSessionsManager;
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
-import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Helpers.Json;
 
 /**
@@ -27,7 +26,7 @@ public class EditAudioSessionMessageHandler implements ReceivedMessageHandler {
         String jsonData = message.substring(messageTypeIdentifierPrefix.length());
         AudioSession editedSession = Json.deserialize(jsonData, AudioSession.class);
 
-        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSession(serverId);
-        sessions.editAudioSession(editedSession);
+        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
+        sessions.updateAudioSession(editedSession);
     }
 }
