@@ -33,6 +33,7 @@ public class SocketServerConnection implements ServerConnection {
     }
     public SocketServerConnection(Server server, Socket socket){this.socket = socket; this.server = server;}
 
+
     @Override
     public Server getServer(){
         return server;
@@ -74,7 +75,6 @@ public class SocketServerConnection implements ServerConnection {
 
     @Override
     public void dispose() {
-        Log.i(MainActivity.TAG, "Closing connection to " + server.ipAddress);
         connected = false;
 
         if(outWriter != null) {
@@ -93,8 +93,16 @@ public class SocketServerConnection implements ServerConnection {
         }
     }
 
+    public void dispose(String debugTag)
+    {
+        Log.i(MainActivity.TAG + ":" + debugTag, "Closing connection to " + server.ipAddress);
+        dispose();
+    }
+
     @Override
     public boolean isConnected(){
         return connected;
     }
+
+
 }

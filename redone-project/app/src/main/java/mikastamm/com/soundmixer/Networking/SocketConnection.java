@@ -27,15 +27,19 @@ public class SocketConnection implements Connection {
 
     private boolean connected = false;
 
-    public SocketConnection(String ipAddress)
-    {
+    public SocketConnection(String ipAddress) {
         this.ipAddress = ipAddress;
     }
-    public SocketConnection(Socket socket){this.socket = socket; this.ipAddress = socket.getInetAddress().getHostAddress();}
+
+    public SocketConnection(Socket socket) {
+        this.socket = socket;
+        this.ipAddress = socket.getInetAddress().getHostAddress();
+    }
+
 
     @Override
     public void writeLine(String line) {
-        if(outWriter != null) {
+        if (outWriter != null) {
             outWriter.println(line);
             outWriter.flush();
         }
@@ -43,33 +47,30 @@ public class SocketConnection implements Connection {
 
     @Override
     public String readLine() throws IOException {
-            return inFromServer.readLine();
+        return inFromServer.readLine();
     }
 
     @Override
     public void connect() {
         Log.i(MainActivity.TAG, "Establishing connection to " + ipAddress);
-        try{
-            if(socket == null || socket.isClosed())
+        try {
+            if (socket == null || socket.isClosed())
                 socket = new Socket(InetAddress.getByName(ipAddress), Constants.SERVER_CONNECTION_TCP_PORT);
 
             inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outstream = socket.getOutputStream();
             outWriter = new PrintWriter(outstream);
             connected = true;
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
     public void dispose() {
-        Log.i(MainActivity.TAG, "Closing connection to " + ipAddress);
         connected = false;
 
-        if(outWriter != null) {
+        if (outWriter != null) {
             outWriter.flush();
             outWriter.close();
         }
@@ -78,15 +79,18 @@ public class SocketConnection implements Connection {
             socket.close();
             inFromServer.close();
             outstream.close();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
+    public void dispose(String tag) {
+        Log.i(MainActivity.TAG + ":" + tag, "Closing connection to " + ipAddress);
+        dispose();
+    }
+
     @Override
-    public boolean isConnected(){
+    public boolean isConnected() {
         return connected;
     }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="@dimen/mockup_element_spacing">
+
+    <FrameLayout
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="@dimen/mockup_element_margin"
+        android:layout_marginLeft="@dimen/mockup_element_margin"
+        android:layout_gravity="center"
+        android:background="@drawable/volume_slider_mockup_bg" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginRight="@dimen/mockup_element_margin"
+        android:layout_gravity="center"
+        android:background="@drawable/volume_slider_mockup_bg" />
+</LinearLayout>

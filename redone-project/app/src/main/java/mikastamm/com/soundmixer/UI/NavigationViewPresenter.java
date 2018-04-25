@@ -70,10 +70,10 @@ public class NavigationViewPresenter {
                 drawerLayout.closeDrawers();
                 toggleGettingStartedOverlay();
                 break;
-            case R.id.nav_settings:
+            /*case R.id.nav_settings:
                 mainActivity.setDisplayedFragment(SettingsFragment.class, mainActivity.getString(R.string.title_activity_settings));
                 drawerLayout.closeDrawers();
-                break;
+                break;*/
             case R.id.nav_feedback:
                 //TODO: Implement Feedback
                 break;

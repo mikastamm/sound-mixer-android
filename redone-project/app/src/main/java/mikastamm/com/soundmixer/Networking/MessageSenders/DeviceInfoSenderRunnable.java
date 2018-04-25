@@ -17,38 +17,30 @@ import mikastamm.com.soundmixer.Networking.ServerConnection;
  * Created by Mika on 18.04.2018.
  */
 
-public class DeviceInfoSender extends MessageSender {
+public class DeviceInfoSenderRunnable implements Runnable {
     public static String messageTag = "DEVINFO";
 
     private Connection connection;
 
-    public DeviceInfoSender(Connection connection)
-    {
+    public DeviceInfoSenderRunnable(Connection connection) {
         this.connection = connection;
     }
 
-    private Runnable sendInfoRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if(connection != null)
-            {
-                Device device = new Device();
-                device.Name = Build.MODEL;
-                device.Version = BuildConfig.VERSION_CODE;
-                device.ID = getDeviceId();
+    @Override
+    public void run() {
+        if (connection != null) {
+            Device device = new Device();
+            device.Name = Build.MODEL;
+            device.Version = BuildConfig.VERSION_CODE;
+            device.ID = getDeviceId();
 
-                connection.writeLine(messageTag + Json.serialize(device));
-                Log.i(MainActivity.TAG, "Sent Device info");
-            }
-            else
-                Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
+            connection.writeLine(messageTag + Json.serialize(device));
+            Log.i(MainActivity.TAG, "Sent Device info");
+        } else
+            Log.i(MainActivity.TAG, "Server Connection Object is null or not connected");
+    }
 
-            startNextMessageSender();
-        }
-    };
-
-    private String getDeviceId()
-    {
+    private String getDeviceId() {
         StringBuilder sb = new StringBuilder();
 
         sb.append(android.os.Build.MANUFACTURER);
@@ -58,10 +50,5 @@ public class DeviceInfoSender extends MessageSender {
         sb.append(android.os.Build.SERIAL);
 
         return sb.toString();
-    }
-
-    @Override
-    public void send(){
-        new Thread(sendInfoRunnable).start();
     }
 }

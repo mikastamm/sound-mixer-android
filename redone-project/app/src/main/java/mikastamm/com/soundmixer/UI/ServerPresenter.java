@@ -6,6 +6,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 
+import java.io.Serializable;
+
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.KnownServerList;
 import mikastamm.com.soundmixer.MainActivity;
@@ -23,16 +25,19 @@ public class ServerPresenter {
     private NavigationView navigationView;
     private SubMenu serverMenu;
     private ServerListeners.ServerListChangeListener listener;
+    NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener ndListener;
 
     public ServerPresenter(MainActivity activity, NavigationView navigationView) {
         this.mainActivity = activity;
         this.navigationView = navigationView;
         serverMenu = navigationView.getMenu().addSubMenu(activity.getString(R.string.main_menu_servers_submenu));
+        addEmptyMenuEntry();
         subscribeToListeners();
     }
 
     public void dispose() {
         ServerList.getInstance().listeners.removeServerListChangeListener(listener);
+        mainActivity.ndSender.delegate.removeListener(ndListener);
     }
 
     private void subscribeToListeners() {
@@ -44,6 +49,7 @@ public class ServerPresenter {
                     @Override
                     public void run() {
                         addServerToMenu(finalServer);
+                        removeEmptyMenuEntry();
                     }
                 });
             }
@@ -62,31 +68,29 @@ public class ServerPresenter {
 
         ServerList.getInstance().listeners.addServerListChangeListener(listener);
 
-        NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener ndListener = new NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener() {
-            @Override public void onNetworkDiscoveryStarted() {
+        ndListener = new NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener() {
+            @Override
+            public void onNetworkDiscoveryStarted() {
                 Log.i(MainActivity.TAG, "Network Discovery Started");
-                for(Server s : ServerList.getInstance())
-                {
-                    removeFromServerMenu(s);
-                }
+                clearServerMenu();
+                addEmptyMenuEntry();
             }
 
-            @Override public void onNetworkDiscoveryFinished() {
+            @Override
+            public void onNetworkDiscoveryFinished() {
                 Log.i(MainActivity.TAG, "Network Discovery Finished");
                 boolean hasConnected = false;
 
-                for(Server s : ServerList.getInstance())
-                {
-                    if(KnownServerList.isLastConnected(s.id, mainActivity)){
+                for (Server s : ServerList.getInstance()) {
+                    if (KnownServerList.isLastConnected(s.id, mainActivity) && !isConnected()) {
                         mainActivity.connect(s);
                         hasConnected = true;
                     }
                 }
 
-                if(!hasConnected)
-                    for(Server s : ServerList.getInstance())
-                    {
-                        if(KnownServerList.isKnown(s.id, mainActivity)){
+                if (!hasConnected)
+                    for (Server s : ServerList.getInstance()) {
+                        if (KnownServerList.isKnown(s.id, mainActivity) && !isConnected()) {
                             mainActivity.connect(s);
                         }
                     }
@@ -94,6 +98,23 @@ public class ServerPresenter {
         };
 
         mainActivity.ndSender.delegate.addListener(ndListener);
+    }
+
+    private boolean isConnected(){
+       return ServerList.getInstance().getActiveServer() != null;
+    }
+
+    //To keep the "Computers" submenu even though there are no servers
+    private void addEmptyMenuEntry(){
+        serverMenu.add(Menu.NONE, 0, Menu.NONE, "");
+    }
+
+    private void removeEmptyMenuEntry(){
+        serverMenu.removeItem(0);
+    }
+
+    private void clearServerMenu(){
+        serverMenu.clear();
     }
 
     private void addServerToMenu(Server server) {

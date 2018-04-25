@@ -9,5 +9,6 @@
     <dimen name="tick_short_width">5dp</dimen>
     <dimen name="seekbar_card_corner_radius">3dp</dimen>
     <dimen name="tick_long_width">10dp</dimen>
-
+    <dimen name="mockup_element_margin">30dp</dimen>
+    <dimen name="mockup_element_spacing">40dp</dimen>
 </resources>

@@ -1,12 +1,14 @@
 package mikastamm.com.soundmixer.Datamodel;
 
+import java.io.Serializable;
+
 import mikastamm.com.soundmixer.ServerState;
 
 /**
  * Created by Mika on 27.03.2018.
  */
 
-public class Server {
+public class Server implements Serializable{
     public String name;
     public boolean hasPassword;
     public String ipAddress;

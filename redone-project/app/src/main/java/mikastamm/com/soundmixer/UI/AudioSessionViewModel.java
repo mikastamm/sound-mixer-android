@@ -37,21 +37,25 @@ public class AudioSessionViewModel {
     }
 
     private void makeViewModel(){
-        for(AudioSession s : model)
-        {
-            viewModel.add(s.copy());
-        }
+        fragment.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                for(AudioSession s : model)
+                {
+                    viewModel.add(s.copy());
+                }
+            }
+        });
     }
 
     private void setupModelListener()
     {
         //Changes sent from the Server to the Client
-
         modelListener = new AudioSessionDelegate.AudioSessionChangeListener() {
             @Override
             public void onAudioSessionAdded(AudioSession newSession) {
                 final AudioSession finalSession = newSession;
-                fragment.getActivity().runOnUiThread(new Runnable() {
+                fragment.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         viewModel.add(finalSession);
@@ -63,7 +67,7 @@ public class AudioSessionViewModel {
             @Override
             public void onAudioSessionRemoved(AudioSession removedSession) {
                 final AudioSession finalSession = removedSession;
-                fragment.getActivity().runOnUiThread(new Runnable() {
+                fragment.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         viewModel.remove(finalSession);
@@ -76,7 +80,7 @@ public class AudioSessionViewModel {
             public void onAudioSessionEdited(AudioSession oldSession, AudioSession newSession) {
                 final AudioSession finalOldSession = oldSession;
                 final AudioSession finalNewSession = newSession;
-                fragment.getActivity().runOnUiThread(new Runnable() {
+                fragment.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         for(AudioSession s : viewModel)

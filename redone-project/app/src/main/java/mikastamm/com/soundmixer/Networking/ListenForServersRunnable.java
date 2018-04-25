@@ -1,4 +1,4 @@
-package mikastamm.com.soundmixer.Networking.MessageSenders;
+package mikastamm.com.soundmixer.Networking;
 
 import android.util.Log;
 

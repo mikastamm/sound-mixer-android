@@ -11,5 +11,6 @@ public interface Connection {
     String readLine() throws IOException;
     void connect();
     void dispose();
+    void dispose(String debugtag); //TODO: Remove
     boolean isConnected();
 }

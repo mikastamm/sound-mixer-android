@@ -69,6 +69,10 @@ public class ServerList implements Iterable<Server>{
         return servers.get(rsaKey);
     }
 
+    public Server getActiveServer() {
+        return active;
+    }
+
     public void setActiveServer(Server newActive)
     {
         try {
@@ -95,10 +99,12 @@ public class ServerList implements Iterable<Server>{
     }
 
     public void removeActiveServer(){
-        active.state = ServerState.connected;
-        Server oldActive = active;
-        active = null;
-        listeners.activeServerChanged(oldActive, null);
+        if(active != null) {
+            active.state = ServerState.connected;
+            Server oldActive = active;
+            active = null;
+            listeners.activeServerChanged(oldActive, null);
+        }
     }
 
     private void validateServer(Server server) throws InvalidServerException

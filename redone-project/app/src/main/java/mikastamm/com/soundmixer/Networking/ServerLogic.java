@@ -6,13 +6,14 @@ import android.util.Log;
 import mikastamm.com.soundmixer.ClientAudioSessionsManager;
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.Server;
-import mikastamm.com.soundmixer.KnownServerList;
+import mikastamm.com.soundmixer.Helpers.NewThreadRunnable;
+import mikastamm.com.soundmixer.Helpers.QueuedRunnable;
 import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.MessageSenders.AudioSessionChangeMessageSender;
-import mikastamm.com.soundmixer.Networking.MessageSenders.DeviceInfoSender;
+import mikastamm.com.soundmixer.Networking.MessageSenders.AudioSessionChangeMessageSenderRunnable;
+import mikastamm.com.soundmixer.Networking.MessageSenders.DeviceInfoSenderRunnable;
 import mikastamm.com.soundmixer.Networking.MessageSenders.RequestAudioSessionsMessageSender;
-import mikastamm.com.soundmixer.Networking.MessageSenders.TrackEndMessageSender;
-import mikastamm.com.soundmixer.Networking.MessageSenders.TrackStartMessageSender;
+import mikastamm.com.soundmixer.Networking.MessageSenders.TrackEndMessageSenderRunnable;
+import mikastamm.com.soundmixer.Networking.MessageSenders.TrackStartMessageSenderRunnable;
 import mikastamm.com.soundmixer.ServerList;
 import mikastamm.com.soundmixer.ServerListeners;
 
@@ -23,7 +24,6 @@ import mikastamm.com.soundmixer.ServerListeners;
 public class ServerLogic {
     private Server server;
     private ServerConnection connection = null;
-    private MessageReceiver receiver;
     private ServerListeners.ServerStateChangeListener serverStateChangeListener;
     private Activity activity;
 
@@ -33,16 +33,22 @@ public class ServerLogic {
     }
 
     public void dispose(){
-        receiver.stopReceiveing();
-        ServerList.getInstance().listeners.removeServerChangeListener(serverStateChangeListener);
+        ServerList.getInstance().listeners.removeServerStateChangeListener(serverStateChangeListener);
         activity = null;
     }
 
     public void connectAndStartCommunicating(){
         connect();
         ClientAudioSessionsManager.registerClientAudioSessions(server.id);
-        receiver = new MessageReceiver(connection, server);
+        initListener();
 
+        QueuedRunnable senders = new QueuedRunnable(new DeviceInfoSenderRunnable(connection));
+        senders.addRunnable(new RequestAudioSessionsMessageSender(connection));
+        senders.addRunnable(new MessageReceiverRunnable(connection, server));
+        senders.runInNewThread();
+    }
+
+    private void initListener(){
         serverStateChangeListener = new ServerListeners.ServerStateChangeListener() {
             @Override
             public void onActiveServerChanged(Server oldActive, Server newActive) {
@@ -65,36 +71,20 @@ public class ServerLogic {
             @Override public void onServerConnected(Server server) {}
         };
         ServerList.getInstance().listeners.addServerStateChangeListener(serverStateChangeListener);
-
-        DeviceInfoSender deviceInfoSender = new DeviceInfoSender(connection);
-        deviceInfoSender.addSender(new RequestAudioSessionsMessageSender(connection));
-        deviceInfoSender.send();
-
-        //Receive in new Thread
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                receiver.startReceiveing();
-            }
-        }).start();
-        KnownServerList.setLastConnectedServer(server.id, activity);
     }
 
     public void sendAudioSessionChanged(AudioSession changedSession){
-        AudioSessionChangeMessageSender s = new AudioSessionChangeMessageSender(changedSession, connection);
-        s.send();
+        new NewThreadRunnable(new AudioSessionChangeMessageSenderRunnable(changedSession, connection)).run();
     }
 
     public void sendTrackStart(String sessionId)
     {
-        TrackStartMessageSender s = new TrackStartMessageSender(sessionId, connection);
-        s.send();
+        new NewThreadRunnable(new TrackStartMessageSenderRunnable(sessionId, connection)).run();
     }
 
     public void sendTrackEnd(String sessionId)
     {
-        TrackEndMessageSender s = new TrackEndMessageSender(sessionId, connection);
-        s.send();
+        new NewThreadRunnable(new TrackEndMessageSenderRunnable(sessionId, connection)).run();
     }
 
     private void connect(){
