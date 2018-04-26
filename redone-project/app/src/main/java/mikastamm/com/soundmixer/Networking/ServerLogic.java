@@ -25,20 +25,21 @@ public class ServerLogic {
     private Server server;
     private ServerConnection connection = null;
     private ServerListeners.ServerStateChangeListener serverStateChangeListener;
-    private Activity activity;
 
-    public ServerLogic(Server server, Activity activity){
+    public ServerLogic(Server server, Activity activity) {
         this.server = server;
-        this.activity = activity;
     }
 
-    public void dispose(){
+    public void dispose() {
         ServerList.getInstance().listeners.removeServerStateChangeListener(serverStateChangeListener);
-        activity = null;
     }
 
-    public void connectAndStartCommunicating(){
-        connect();
+    public void connectAndStartCommunicating() {
+        if(isAlreadyConnected())
+            recoverConnection();
+        else
+            makeNewConnection();
+
         ClientAudioSessionsManager.registerClientAudioSessions(server.id);
         initListener();
 
@@ -48,68 +49,73 @@ public class ServerLogic {
         senders.runInNewThread();
     }
 
-    private void initListener(){
+    private void initListener() {
         serverStateChangeListener = new ServerListeners.ServerStateChangeListener() {
             @Override
             public void onActiveServerChanged(Server oldActive, Server newActive) {
                 Log.i(MainActivity.TAG, "Active server changed from " + (oldActive == null ? "NULL" : oldActive.name) + " to " + (newActive == null ? "NULL" : newActive.name));
 
                 //If the active server is changed to another server this instance is no longer needed
-                if(oldActive != null && oldActive.id.equals(server.id))
-                {
+                if (oldActive != null && oldActive.id.equals(server.id)) {
                     dispose();
                 }
             }
 
-            @Override public void onServerDisconnected(Server server) {
-                if(server.id.equals(ServerLogic.this.server.id))
-                {
+            @Override
+            public void onServerDisconnected(Server server) {
+                if (server.id.equals(ServerLogic.this.server.id)) {
                     ServerList.getInstance().removeActiveServer();
+                    ServerConnectionList.getInstance().disconnectAndRemove(server.id);
                 }
             }
 
-            @Override public void onServerConnected(Server server) {}
+            @Override
+            public void onServerConnected(Server server) {
+            }
         };
         ServerList.getInstance().listeners.addServerStateChangeListener(serverStateChangeListener);
     }
 
-    public void sendAudioSessionChanged(AudioSession changedSession){
+    public void sendAudioSessionChanged(AudioSession changedSession) {
         new NewThreadRunnable(new AudioSessionChangeMessageSenderRunnable(changedSession, connection)).run();
     }
 
-    public void sendTrackStart(String sessionId)
-    {
+    public void sendTrackStart(String sessionId) {
         new NewThreadRunnable(new TrackStartMessageSenderRunnable(sessionId, connection)).run();
     }
 
-    public void sendTrackEnd(String sessionId)
-    {
+    public void sendTrackEnd(String sessionId) {
         new NewThreadRunnable(new TrackEndMessageSenderRunnable(sessionId, connection)).run();
     }
 
-    private void connect(){
-        //If a ServerConnection already exists use it else establish a new connection
+    private void makeNewConnection() {
+        connection = new ConnectionFactory(ConnectionFactory.ConnectionType.Socket).makeConnection(server);
+        ServerConnectionList.getInstance().add(connection);
+        //Connect on new Thread
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                connection.connect();
+            }
+        }).start();
+        checkIfConnectedAndRaiseEvents();
+    }
+
+    private void recoverConnection() {
         connection = ServerConnectionList.getInstance().get(server.id);
-        if(connection == null) {
-            connection = new ConnectionFactory(ConnectionFactory.ConnectionType.Socket).makeConnection(server);
-            ServerConnectionList.getInstance().add(connection);
-        }
+        checkIfConnectedAndRaiseEvents();
+    }
 
-            //Connect on new Thread
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    connection.connect();
-                }
-            }).start();
-
-
-        ServerList.getInstance().setActiveServer(server);
-
-        if(connection.isConnected()) {
+    private void checkIfConnectedAndRaiseEvents(){
+        if (connection.isConnected()) {
             ServerList.getInstance().listeners.serverConnected(server);
+            ServerList.getInstance().setActiveServer(server);
             Log.i(MainActivity.TAG, "Server " + server.name + " now connected & active");
         }
+    }
+
+    private boolean isAlreadyConnected() {
+        return ServerConnectionList.getInstance().contains(server.id);
     }
 
 

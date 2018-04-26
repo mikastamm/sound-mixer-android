@@ -93,12 +93,6 @@ public class SocketServerConnection implements ServerConnection {
         }
     }
 
-    public void dispose(String debugTag)
-    {
-        Log.i(MainActivity.TAG + ":" + debugTag, "Closing connection to " + server.ipAddress);
-        dispose();
-    }
-
     @Override
     public boolean isConnected(){
         return connected;

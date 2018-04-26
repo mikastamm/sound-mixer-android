@@ -49,6 +49,6 @@ public class GetInfoFromServerRunnable implements Runnable {
             }
         }
 
-        connection.dispose("NetworkDiscovery->getServerInfo");
+        connection.dispose();
     }
 }

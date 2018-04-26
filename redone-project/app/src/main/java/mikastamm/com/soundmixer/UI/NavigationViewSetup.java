@@ -8,7 +8,6 @@ import android.view.MenuItem;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.ServerLogic;
 import mikastamm.com.soundmixer.R;
 import mikastamm.com.soundmixer.ServerList;
 
@@ -16,7 +15,7 @@ import mikastamm.com.soundmixer.ServerList;
  * Created by Mika on 09.04.2018.
  */
 
-public class NavigationViewPresenter {
+public class NavigationViewSetup {
     private MainActivity mainActivity;
 
     private Toolbar toolbar;
@@ -24,13 +23,16 @@ public class NavigationViewPresenter {
     public ActionBarDrawerToggle actionBarToggle;
     public NavigationView navigationView;
 
-    public NavigationViewPresenter(MainActivity mainActivity)
+    public NavigationViewSetup(MainActivity mainActivity)
     {
         this.mainActivity = mainActivity;
-        setupNavigationDrawer();
+        initNavigationDrawer();
+
+        //Dialog that shows how to use the App
+        initGettingStartedFragment();
     }
 
-    private void setupNavigationDrawer(){
+    private void initNavigationDrawer(){
         // Set a Toolbar to replace the ActionBar.
         toolbar = mainActivity.findViewById(R.id.toolbar);
         mainActivity.setSupportActionBar(toolbar);
@@ -43,6 +45,11 @@ public class NavigationViewPresenter {
         navigationView = mainActivity.findViewById(R.id.nvView);
         // Setup drawer view
         setupDrawerContent(navigationView);
+    }
+
+    private void initGettingStartedFragment(){
+        GettingStartedFragment fragment = new GettingStartedFragment();
+        mainActivity.getSupportFragmentManager().beginTransaction().replace(R.id.fgGettingStarted, fragment).commit();
     }
 
     private ActionBarDrawerToggle setupDrawerToggle() {
@@ -64,7 +71,7 @@ public class NavigationViewPresenter {
         //Find the clicked DrawerItem and react accordingly
         switch(menuItem.getItemId()) {
             case R.id.nav_refresh:
-                mainActivity.ndSender.searchForServers();
+                mainActivity.networkDiscoveryBroadcastSender.searchForServers();
                 break;
             case R.id.nav_info:
                 drawerLayout.closeDrawers();

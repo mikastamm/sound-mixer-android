@@ -6,8 +6,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 
-import java.io.Serializable;
-
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.KnownServerList;
 import mikastamm.com.soundmixer.MainActivity;
@@ -37,7 +35,7 @@ public class ServerPresenter {
 
     public void dispose() {
         ServerList.getInstance().listeners.removeServerListChangeListener(listener);
-        mainActivity.ndSender.delegate.removeListener(ndListener);
+        mainActivity.networkDiscoveryBroadcastSender.delegate.removeListener(ndListener);
     }
 
     private void subscribeToListeners() {
@@ -97,7 +95,7 @@ public class ServerPresenter {
             }
         };
 
-        mainActivity.ndSender.delegate.addListener(ndListener);
+        mainActivity.networkDiscoveryBroadcastSender.delegate.addListener(ndListener);
     }
 
     private boolean isConnected(){

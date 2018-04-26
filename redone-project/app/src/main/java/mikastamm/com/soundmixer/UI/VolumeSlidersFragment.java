@@ -43,7 +43,6 @@ public class VolumeSlidersFragment extends Fragment {
     private ClientAudioSessions audioSessions;
     private AudioSessionViewModel audioSessionViewModel;
 
-    private int orientation;
 
     public static VolumeSlidersFragment newInstanceAndConnect(Server server) {
         VolumeSlidersFragment fragment = new VolumeSlidersFragment();
@@ -59,13 +58,15 @@ public class VolumeSlidersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        orientation = getResources().getConfiguration().orientation;
+
+        //Don't recreate this fragment on orientation change, keep the existing instance
+        setRetainInstance(true);
+
         recoverServer(savedInstanceState);
         activeServerLogic = new ServerLogic(server, getActivity());
         activeServerLogic.connectAndStartCommunicating();
         audioSessions = ClientAudioSessionsManager.getClientAudioSessions(server.id);
         audioSessionViewModel = audioSessions.getViewModel(this);
-
     }
 
 

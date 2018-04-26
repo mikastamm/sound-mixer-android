@@ -81,7 +81,7 @@ public class ServerList implements Iterable<Server>{
             Server oldActive = active;
 
             if(oldActive != null && oldActive.id.equals(newActive.id))
-                oldActive = null;
+                return;
 
             if (oldActive != null)
                 oldActive.state = ServerState.connected;

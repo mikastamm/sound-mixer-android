@@ -9,7 +9,7 @@ import mikastamm.com.soundmixer.ServerListeners;
  * Created by Mika on 25.04.2018.
  */
 
-public class NoVolumeSlidersToShowReplacer {
+public class NoVolumeSlidersToShowPlaceholder {
     private MainActivity mainActivity;
     private ServerListeners.ServerStateChangeListener stateChangeListener = new ServerListeners.ServerStateChangeListener() {
 
@@ -26,7 +26,7 @@ public class NoVolumeSlidersToShowReplacer {
         @Override public void onServerDisconnected(Server server) {}
     };
 
-    public NoVolumeSlidersToShowReplacer(MainActivity mainActivity)
+    public NoVolumeSlidersToShowPlaceholder(MainActivity mainActivity)
     {
         this.mainActivity = mainActivity;
     }

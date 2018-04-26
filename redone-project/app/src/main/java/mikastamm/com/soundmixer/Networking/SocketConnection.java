@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.MainActivity;
 
 /**
@@ -82,11 +81,6 @@ public class SocketConnection implements Connection {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    public void dispose(String tag) {
-        Log.i(MainActivity.TAG + ":" + tag, "Closing connection to " + ipAddress);
-        dispose();
     }
 
     @Override

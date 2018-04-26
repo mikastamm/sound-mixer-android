@@ -1,108 +1,78 @@
 package mikastamm.com.soundmixer;
 
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
 import mikastamm.com.soundmixer.Networking.ServerConnectionList;
-import mikastamm.com.soundmixer.Networking.ServerLogic;
-import mikastamm.com.soundmixer.UI.GettingStartedFragment;
-import mikastamm.com.soundmixer.UI.NavigationViewPresenter;
-import mikastamm.com.soundmixer.UI.NoVolumeSlidersToShowReplacer;
+import mikastamm.com.soundmixer.UI.NavigationViewSetup;
+import mikastamm.com.soundmixer.UI.NoVolumeSlidersToShowPlaceholder;
 import mikastamm.com.soundmixer.UI.ServerPresenter;
-import mikastamm.com.soundmixer.UI.SettingsFragment;
 import mikastamm.com.soundmixer.UI.VolumeSlidersFragment;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "sound-mixer-log";
 
-    private NavigationViewPresenter navigationViewPresenter;
+    //Sets up and manages the navigation drawer (Sidebar)
+    private NavigationViewSetup navigationViewSetup;
+
+    //Keeps the Servers in the Sidebar up to date with the Datamodel
     private ServerPresenter serverPresenter;
 
     //Sends broadcast and receives response from all available servers in the network
-    public NetworkDiscoveryBroadcastSender ndSender;
+    public NetworkDiscoveryBroadcastSender networkDiscoveryBroadcastSender = new NetworkDiscoveryBroadcastSender(this);
 
-    private NoVolumeSlidersToShowReplacer nothingToShow = new NoVolumeSlidersToShowReplacer(this);
+    //Placeholder for when not connected to any server
+    private NoVolumeSlidersToShowPlaceholder nothingToShowPlaceholder = new NoVolumeSlidersToShowPlaceholder(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ndSender = new NetworkDiscoveryBroadcastSender(this);
+        navigationViewSetup = new NavigationViewSetup(this);
+        serverPresenter = new ServerPresenter(this, navigationViewSetup.navigationView);
 
-        GettingStartedFragment fragment = new GettingStartedFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.fgGettingStarted, fragment).commit();
-
-        navigationViewPresenter = new NavigationViewPresenter(this);
-        serverPresenter = new ServerPresenter(this, navigationViewPresenter.navigationView);
-
-        nothingToShow.startListening();
-        nothingToShow.showReplacer();
-
-        ndSender.searchForServers();
-    }
-
-    @Override
-    protected void onStop(){
-        super.onStop();
-        ndSender.stopSearch();
-    }
-
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        nothingToShow.stopListening();
-        serverPresenter.dispose();
-
-        if(isFinishing())
-        ServerConnectionList.getInstance().disconnectAndClear();
-    }
-
-    public void connect(final Server s)
-    {
-        if(s != null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setDisplayedFragment(VolumeSlidersFragment.newInstanceAndConnect(s), s.name);
-                }
-            });
+        if (!fragmentRetained()) {
+            nothingToShowPlaceholder.startListening();
+            nothingToShowPlaceholder.showReplacer();
         }
-        else
-            Log.e(MainActivity.TAG, "MainActivity.connect(Server): Did not connect: passed Server was null");
+
+        networkDiscoveryBroadcastSender.searchForServers();
     }
 
-    public void setDisplayedFragment(Fragment fragment, String newTitle)
-    {
+    private boolean fragmentRetained() {
+        return getSupportFragmentManager().findFragmentByTag(VolumeSlidersFragment.class.getSimpleName()) == null;
+    }
+
+    public void connect(final Server s) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setDisplayedFragment(VolumeSlidersFragment.newInstanceAndConnect(s), s.name);
+            }
+        });
+    }
+
+    public void setDisplayedFragment(Fragment fragment, String newTitle) {
         // Insert the fragment by replacing any existing fragment
-        if(fragment != null) {
+        if (fragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction tx = fragmentManager.beginTransaction().replace(R.id.flContent, fragment);
+            FragmentTransaction tx = fragmentManager.beginTransaction().replace(R.id.flContent, fragment, fragment.getClass().getSimpleName());
 
             tx.commitAllowingStateLoss();
             setTitle(newTitle);
         }
     }
 
-    public void setDisplayedFragment(Class<? extends Fragment> fragmentClass, String newTitle)
-    {
+    public void setDisplayedFragment(Class<? extends Fragment> fragmentClass, String newTitle) {
         Fragment fragment = null;
 
         try {
@@ -115,22 +85,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstance)
-    {
+    protected void onPostCreate(Bundle savedInstance) {
         super.onPostCreate(savedInstance);
-        navigationViewPresenter.actionBarToggle.syncState();
+        navigationViewSetup.actionBarToggle.syncState();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        networkDiscoveryBroadcastSender.stopSearch();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        nothingToShowPlaceholder.stopListening();
+        serverPresenter.dispose();
+
+        if (isFinishing())
+            ServerConnectionList.getInstance().disconnectAndClear();
+    }
+
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change (e.g. orientation change) to the drawer toggles
-        navigationViewPresenter.actionBarToggle.onConfigurationChanged(newConfig);
+        navigationViewSetup.actionBarToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return navigationViewPresenter.actionBarToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+        return navigationViewSetup.actionBarToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
 
