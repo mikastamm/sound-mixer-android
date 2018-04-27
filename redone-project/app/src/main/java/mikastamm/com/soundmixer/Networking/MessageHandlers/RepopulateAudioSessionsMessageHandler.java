@@ -26,9 +26,11 @@ public class RepopulateAudioSessionsMessageHandler implements ReceivedMessageHan
 
     @Override
     public void handleMessage() {
+        //Deserialize received Json
         String vDataJson = message.substring(3);
         AudioSession[] recv = Json.deserialize(vDataJson, AudioSession[].class);
 
+        //Clear and then add the AudioSession to the datamodel
         ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
         sessions.clearAudioSessions();
         sessions.addAudioSessions(recv);

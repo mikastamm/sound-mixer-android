@@ -44,7 +44,7 @@ public class ServerListTests {
     @Test
     public void test_ServerChangeListenerFires(){
 
-        list.listeners.addServerStateChangeListener(new ServerListeners.ServerStateChangeListener() {
+        list.stateChangeDelegate.addServerStateChangeListener(new ServerStateChangeDelegate.ServerStateChangeListener() {
             @Override
             public void onServerConnected(Server server) {
                 connected++;
@@ -64,9 +64,9 @@ public class ServerListTests {
         fillServerList();
         for(int i = 0; i < rsaKeys.length; i++) {
             Server server = list.getServer(rsaKeys[i]);
-            list.listeners.serverConnected(server);
+            list.stateChangeDelegate.serverConnected(server);
             list.setActiveServer(server);
-            list.listeners.serverDisconnected(server);
+            list.stateChangeDelegate.serverDisconnected(server);
         }
         assertThat(connected == 10, is(true));
         assertThat(disconnected == 10, is(true));
@@ -78,7 +78,7 @@ public class ServerListTests {
 
     @Test
     public void test_ServerListenerFires(){
-        list.listeners.addServerListChangeListener(new ServerListeners.ServerListChangeListener() {
+        list.changeDelegate.addServerListChangeListener(new ServerListChangeDelegate.ServerListChangeListener() {
             @Override
             public void onServerDiscovered(Server server) {
                 discovered++;

@@ -12,35 +12,22 @@ public class Server implements Serializable{
     public String name;
     public boolean hasPassword;
     public String ipAddress;
-    public String savedPassword;
     public String id;
     public ServerState state = ServerState.available;
-
-    public Server(boolean hasPassword, String name, String ipAddress, String savedPassword, String id)
-    {
-        this.name = name;
-        this.ipAddress = ipAddress;
-        this.savedPassword = savedPassword;
-        this.hasPassword = hasPassword;
-        this.id = id;
-    }
 
     public Server(boolean hasPassword, String name, String ipAddress, String id)
     {
         this.name = name;
         this.ipAddress = ipAddress;
-        this.savedPassword = "";
         this.hasPassword = hasPassword;
         this.id = id;
     }
 
-    public Server() {
-
-    }
+    public Server() {}
 
     @Override
     public String toString(){
-        return "\nName="+name+"\nhasPassword="+hasPassword+"\nipAddress="+ ipAddress +"\nsavedPassword="+ savedPassword +"\nid="+ id;
+        return "\nName="+name+"\nhasPassword="+hasPassword+"\nipAddress="+ ipAddress +"\nid="+ id;
     }
 
     @Override

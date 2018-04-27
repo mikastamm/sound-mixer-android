@@ -3,7 +3,7 @@ package mikastamm.com.soundmixer.UI;
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.ServerList;
-import mikastamm.com.soundmixer.ServerListeners;
+import mikastamm.com.soundmixer.ServerStateChangeDelegate;
 
 /**
  * Created by Mika on 25.04.2018.
@@ -11,7 +11,7 @@ import mikastamm.com.soundmixer.ServerListeners;
 
 public class NoVolumeSlidersToShowPlaceholder {
     private MainActivity mainActivity;
-    private ServerListeners.ServerStateChangeListener stateChangeListener = new ServerListeners.ServerStateChangeListener() {
+    private ServerStateChangeDelegate.ServerStateChangeListener stateChangeListener = new ServerStateChangeDelegate.ServerStateChangeListener() {
 
         @Override
         public void onActiveServerChanged(Server oldActive, Server newActive) {
@@ -32,11 +32,11 @@ public class NoVolumeSlidersToShowPlaceholder {
     }
 
     public void startListening(){
-        ServerList.getInstance().listeners.addServerStateChangeListener(stateChangeListener);
+        ServerList.getInstance().stateChangeDelegate.addServerStateChangeListener(stateChangeListener);
     }
 
     public void stopListening(){
-        ServerList.getInstance().listeners.removeServerStateChangeListener(stateChangeListener);
+        ServerList.getInstance().stateChangeDelegate.removeServerStateChangeListener(stateChangeListener);
     }
 
     public void showReplacer(){

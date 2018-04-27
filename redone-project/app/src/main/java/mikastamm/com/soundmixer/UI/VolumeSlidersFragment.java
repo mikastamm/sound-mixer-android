@@ -1,12 +1,9 @@
 package mikastamm.com.soundmixer.UI;
 
-import android.app.Activity;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +12,12 @@ import org.lucasr.twowayview.TwoWayView;
 
 import java.io.Serializable;
 
-import mikastamm.com.soundmixer.AudioSessionDelegate;
 import mikastamm.com.soundmixer.ClientAudioSessions;
 import mikastamm.com.soundmixer.ClientAudioSessionsManager;
-import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Exceptions.ServerNotFoundException;
-import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.Connection;
 import mikastamm.com.soundmixer.Networking.ServerLogic;
 import mikastamm.com.soundmixer.R;
-import mikastamm.com.soundmixer.ServerListeners;
 
 /**
  * Created by Mika on 03.04.2018.

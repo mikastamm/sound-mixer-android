@@ -1,6 +1,5 @@
 package mikastamm.com.soundmixer.Networking;
 
-import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.AddAudioSessionMessageHandler;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.AddImageToAudioSessionMessageHandler;
 import mikastamm.com.soundmixer.Networking.MessageHandlers.EditAudioSessionMessageHandler;
@@ -37,11 +36,11 @@ public class MessageHandlerFactory {
         }
         else if (msg.startsWith("IMGS")) // All application icons
         {
-            return new AddImageToAudioSessionMessageHandler(msg, serverId, true);
+            return new AddImageToAudioSessionMessageHandler(msg, serverId);
         }
         else if (msg.startsWith("IMG")) // Single application Icon
         {
-            return new AddImageToAudioSessionMessageHandler(msg, serverId, false);
+            return new AddImageToAudioSessionMessageHandler(msg, serverId);
         }
         else if(msg.equals("AUTHWPW"))
         {

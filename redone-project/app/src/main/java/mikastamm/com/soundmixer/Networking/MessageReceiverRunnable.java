@@ -40,7 +40,7 @@ public class MessageReceiverRunnable implements Runnable {
         } finally {
             Log.i(MainActivity.TAG, "MessageReceiver: Connection to server " + server.name + " lost");
             connection.dispose();
-            ServerList.getInstance().listeners.serverDisconnected(server);
+            ServerList.getInstance().stateChangeDelegate.serverDisconnected(server);
         }
     }
 }

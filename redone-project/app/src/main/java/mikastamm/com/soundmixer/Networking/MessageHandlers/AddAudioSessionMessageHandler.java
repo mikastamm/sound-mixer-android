@@ -23,9 +23,11 @@ public class AddAudioSessionMessageHandler implements ReceivedMessageHandler {
 
     @Override
     public void handleMessage() {
+        //Deserialize received Json
         String jsonData = message.substring(messageTypeIdentifierPrefix.length());
         AudioSession newSession = Json.deserialize(jsonData, AudioSession.class);
 
+        //Add the received Session to the datamodel
         ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
         sessions.addAudioSession(newSession);
     }

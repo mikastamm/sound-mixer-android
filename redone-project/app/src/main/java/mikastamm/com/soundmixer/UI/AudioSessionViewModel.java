@@ -21,8 +21,7 @@ public class AudioSessionViewModel {
 
     private VolumeSlidersFragment fragment;
 
-    public AudioSessionViewModel(List<AudioSession> model, AudioSessionDelegate modelDelegate, VolumeSlidersFragment fragment)
-    {
+    public AudioSessionViewModel(List<AudioSession> model, AudioSessionDelegate modelDelegate, VolumeSlidersFragment fragment) {
         this.model = model;
         this.modelDelegate = modelDelegate;
         this.fragment = fragment;
@@ -31,25 +30,23 @@ public class AudioSessionViewModel {
         setupViewListener();
     }
 
-    public void dispose(){
+    public void dispose() {
         modelDelegate.removeAudioSessionChangeListener(modelListener);
         viewModelDelegate.removeAudioSessionChangeListener(viewModelListener);
     }
 
-    private void makeViewModel(){
+    private void makeViewModel() {
         fragment.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                for(AudioSession s : model)
-                {
+                for (AudioSession s : model) {
                     viewModel.add(s.copy());
                 }
             }
         });
     }
 
-    private void setupModelListener()
-    {
+    private void setupModelListener() {
         //Changes sent from the Server to the Client
         modelListener = new AudioSessionDelegate.AudioSessionChangeListener() {
             @Override
@@ -70,8 +67,17 @@ public class AudioSessionViewModel {
                 fragment.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        viewModel.remove(finalSession);
-                        fragment.notifyDatasetChanged();
+                        int toDelete = -1;
+                        for (int i = 0; i < viewModel.size(); i++) {
+                            if (viewModel.get(i).id.equals(finalSession.id)) {
+                                toDelete = i;
+                            }
+                        }
+
+                        if (toDelete != -1) {
+                            viewModel.remove(toDelete);
+                            fragment.notifyDatasetChanged();
+                        }
                     }
                 });
             }
@@ -83,10 +89,8 @@ public class AudioSessionViewModel {
                 fragment.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        for(AudioSession s : viewModel)
-                        {
-                            if(s.id.equals(finalOldSession.id))
-                            {
+                        for (AudioSession s : viewModel) {
+                            if (s.id.equals(finalOldSession.id)) {
                                 s.updateValues(finalNewSession);
                                 break;
                             }
@@ -99,27 +103,31 @@ public class AudioSessionViewModel {
         modelDelegate.addAudioSessionChangeListener(modelListener);
     }
 
-    public void setTracking(String sessionId, boolean tracking)
-    {
-        if(tracking)
+    public void setTracking(String sessionId, boolean tracking) {
+        if (tracking)
             fragment.activeServerLogic.sendTrackStart(sessionId);
         else
             fragment.activeServerLogic.sendTrackEnd(sessionId);
     }
 
-    private void setupViewListener(){
+    private void setupViewListener() {
         //Changes made by user
         viewModelListener = new AudioSessionDelegate.AudioSessionChangeListener() {
             @Override
             public void onAudioSessionEdited(AudioSession oldSession, AudioSession newSession) {
-                if(oldSession.isTracking != newSession.isTracking)
+                if (oldSession.isTracking != newSession.isTracking)
                     setTracking(newSession.id, newSession.isTracking);
 
                 fragment.activeServerLogic.sendAudioSessionChanged(newSession);
             }
 
-            @Override public void onAudioSessionAdded(AudioSession newSession) {}
-            @Override public void onAudioSessionRemoved(AudioSession removedSession) {}
+            @Override
+            public void onAudioSessionAdded(AudioSession newSession) {
+            }
+
+            @Override
+            public void onAudioSessionRemoved(AudioSession removedSession) {
+            }
 
         };
         viewModelDelegate.addAudioSessionChangeListener(viewModelListener);

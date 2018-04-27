@@ -5,6 +5,7 @@ import java.util.List;
 
 import mikastamm.com.soundmixer.Datamodel.AudioSession;
 import mikastamm.com.soundmixer.Datamodel.AudioSessionIcon;
+import mikastamm.com.soundmixer.Datamodel.DecodedAudioSessionIcon;
 import mikastamm.com.soundmixer.Helpers.ImageEncodingFactory;
 import mikastamm.com.soundmixer.UI.AudioSessionViewModel;
 import mikastamm.com.soundmixer.UI.VolumeSlidersFragment;
@@ -54,15 +55,20 @@ public class ClientAudioSessions {
         }
     }
 
-    public void setAudioSessionImage(AudioSessionIcon img)
+    public void setAudioSessionImage(AudioSessionIcon icon)
     {
-        AudioSession newS = getAudioSession(img.id);
+        AudioSession newS = getAudioSession(icon.id);
 
         if(newS == null)
             return;
 
+        //AudioSessionIcon hold the String representation of the icon
+        //We have to convert it to a Bitmap object first
+        DecodedAudioSessionIcon decodedIcon = DecodedAudioSessionIcon.fromAudioSessionIcon(icon);
+        AudioSessionIconList.getInstance().add(decodedIcon);
+
         AudioSession old = newS.copy();
-        newS.icon = ImageEncodingFactory.getStandardEncoding().decode(img.icon);
+        newS.icon = decodedIcon.icon;
         listener.audioSessionEdited(old, newS);
     }
 
@@ -72,7 +78,6 @@ public class ClientAudioSessions {
         {
             if(s.id.equals(id))
             {
-
                 del = s;
                 break;
             }
@@ -81,6 +86,7 @@ public class ClientAudioSessions {
         if(del != null)
         {
             audioSessions.remove(del);
+            AudioSessionIconList.getInstance().remove(id);
             listener.audioSessionRemoved(del);
         }
     }
@@ -89,6 +95,7 @@ public class ClientAudioSessions {
     {
         List<AudioSession> clearedSessions = new ArrayList<AudioSession>(audioSessions);
         audioSessions.clear();
+        AudioSessionIconList.getInstance().clear();
 
         for(AudioSession s : clearedSessions)
         {

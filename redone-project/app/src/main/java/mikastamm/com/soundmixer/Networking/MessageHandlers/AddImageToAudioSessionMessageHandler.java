@@ -9,43 +9,26 @@ import mikastamm.com.soundmixer.Helpers.Json;
  * Created by Mika on 02.04.2018.
  */
 
-public class AddImageToAudioSessionMessageHandler implements ReceivedMessageHandler{
-    public static String messageTypeIdentifierPrefix;
+public class AddImageToAudioSessionMessageHandler implements ReceivedMessageHandler {
+    public static String messageTypeIdentifierPrefix = "IMG";
 
     private String message;
     private String serverId;
-    private boolean multiple;
 
-    public AddImageToAudioSessionMessageHandler(String message, String serverId, boolean multiple)
-    {
+    public AddImageToAudioSessionMessageHandler(String message, String serverId) {
         this.message = message;
         this.serverId = serverId;
-        this.multiple = multiple;
-
-        if(multiple)
-            messageTypeIdentifierPrefix = "IMGS";
-        else
-            messageTypeIdentifierPrefix = "IMG";
     }
 
     @Override
     public void handleMessage() {
-        if(multiple) {
-            String jsonData = message.substring(messageTypeIdentifierPrefix.length());
-            AudioSessionIcon[] icons = Json.deserialize(jsonData, AudioSessionIcon[].class);
+        //Deserialize received Json
+        String jsonData = message.substring(messageTypeIdentifierPrefix.length());
+        AudioSessionIcon icon = Json.deserialize(jsonData, AudioSessionIcon.class);
 
-            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
-            for(AudioSessionIcon icon : icons) {
-                sessions.setAudioSessionImage(icon);
-            }
-        }
-        else{
-            String jsonData = message.substring(messageTypeIdentifierPrefix.length());
-            AudioSessionIcon icon = Json.deserialize(jsonData, AudioSessionIcon.class);
-
-            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
-            sessions.setAudioSessionImage(icon);
-        }
+        //Add image to datamodel
+        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
+        sessions.setAudioSessionImage(icon);
     }
 
 

@@ -23,10 +23,14 @@ public class RemoveAudioSessionMessageHandler implements ReceivedMessageHandler{
 
     @Override
     public void handleMessage() {
+        //Deserialize received Json
         String jsonData = message.substring(messageTypeIdentifierPrefix.length());
         AudioSession newSession = Json.deserialize(jsonData, AudioSession.class);
 
-        ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
-        sessions.removeAudioSession(newSession.id);
+        //Remove the AudioSession from the Datamodel
+        if(newSession != null) {
+            ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
+            sessions.removeAudioSession(newSession.id);
+        }
     }
 }

@@ -12,7 +12,7 @@ import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
 import mikastamm.com.soundmixer.R;
 import mikastamm.com.soundmixer.ServerList;
-import mikastamm.com.soundmixer.ServerListeners;
+import mikastamm.com.soundmixer.ServerListChangeDelegate;
 
 /**
  * Created by Mika on 09.04.2018.
@@ -22,7 +22,7 @@ public class ServerPresenter {
     private MainActivity mainActivity;
     private NavigationView navigationView;
     private SubMenu serverMenu;
-    private ServerListeners.ServerListChangeListener listener;
+    private ServerListChangeDelegate.ServerListChangeListener listener;
     NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener ndListener;
 
     public ServerPresenter(MainActivity activity, NavigationView navigationView) {
@@ -34,12 +34,12 @@ public class ServerPresenter {
     }
 
     public void dispose() {
-        ServerList.getInstance().listeners.removeServerListChangeListener(listener);
+        ServerList.getInstance().changeDelegate.removeServerListChangeListener(listener);
         mainActivity.networkDiscoveryBroadcastSender.delegate.removeListener(ndListener);
     }
 
     private void subscribeToListeners() {
-        listener = new ServerListeners.ServerListChangeListener() {
+        listener = new ServerListChangeDelegate.ServerListChangeListener() {
             @Override
             public void onServerDiscovered(Server server) {
                 final Server finalServer = server;
@@ -64,7 +64,7 @@ public class ServerPresenter {
             }
         };
 
-        ServerList.getInstance().listeners.addServerListChangeListener(listener);
+        ServerList.getInstance().changeDelegate.addServerListChangeListener(listener);
 
         ndListener = new NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener() {
             @Override

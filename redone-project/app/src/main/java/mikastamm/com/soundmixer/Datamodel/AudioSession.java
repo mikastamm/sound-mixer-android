@@ -4,9 +4,7 @@ import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.util.Log;
 
-/**
- * Created by Mika on 28.03.2018.
- */
+import mikastamm.com.soundmixer.Exceptions.AudioSessionIdMismatchException;
 
 public class AudioSession {
     public String title;
@@ -25,6 +23,12 @@ public class AudioSession {
         this.id = sessionID;
     }
 
+    public AudioSession(String name, float volume, boolean mute, String sessionID, Bitmap icon)
+    {
+        this(name, volume, mute, sessionID);
+        this.icon = icon;
+    }
+
     public AudioSession(){}
 
     public void updateValues(AudioSession session)
@@ -33,15 +37,14 @@ public class AudioSession {
             title = session.title;
             volume = session.volume;
             mute = session.mute;
+            icon = session.icon;
         }
         else{
-            throw new RuntimeException("Audio Session ID Mismatch : ("+id +" to " + session.id +") Attempted to update Audio Session with another Audio Session that does not have the same id");
+            throw new AudioSessionIdMismatchException("Audio Session ID Mismatch : ("+id +" to " + session.id +") Attempted to update Audio Session with another Audio Session that does not have the same id");
         }
     }
 
     public AudioSession copy(){
-        AudioSession ret = new AudioSession(title, volume, mute, id);
-        ret.icon = icon;
-        return ret;
+        return new AudioSession(title, volume, mute, id, icon);
     }
 }

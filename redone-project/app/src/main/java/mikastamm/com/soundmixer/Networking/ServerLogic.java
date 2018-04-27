@@ -15,7 +15,7 @@ import mikastamm.com.soundmixer.Networking.MessageSenders.RequestAudioSessionsMe
 import mikastamm.com.soundmixer.Networking.MessageSenders.TrackEndMessageSenderRunnable;
 import mikastamm.com.soundmixer.Networking.MessageSenders.TrackStartMessageSenderRunnable;
 import mikastamm.com.soundmixer.ServerList;
-import mikastamm.com.soundmixer.ServerListeners;
+import mikastamm.com.soundmixer.ServerStateChangeDelegate;
 
 /**
  * Created by Mika on 03.04.2018.
@@ -24,14 +24,14 @@ import mikastamm.com.soundmixer.ServerListeners;
 public class ServerLogic {
     private Server server;
     private ServerConnection connection = null;
-    private ServerListeners.ServerStateChangeListener serverStateChangeListener;
+    private ServerStateChangeDelegate.ServerStateChangeListener serverStateChangeListener;
 
     public ServerLogic(Server server, Activity activity) {
         this.server = server;
     }
 
     public void dispose() {
-        ServerList.getInstance().listeners.removeServerStateChangeListener(serverStateChangeListener);
+        ServerList.getInstance().stateChangeDelegate.removeServerStateChangeListener(serverStateChangeListener);
     }
 
     public void connectAndStartCommunicating() {
@@ -50,7 +50,7 @@ public class ServerLogic {
     }
 
     private void initListener() {
-        serverStateChangeListener = new ServerListeners.ServerStateChangeListener() {
+        serverStateChangeListener = new ServerStateChangeDelegate.ServerStateChangeListener() {
             @Override
             public void onActiveServerChanged(Server oldActive, Server newActive) {
                 Log.i(MainActivity.TAG, "Active server changed from " + (oldActive == null ? "NULL" : oldActive.name) + " to " + (newActive == null ? "NULL" : newActive.name));
@@ -73,7 +73,7 @@ public class ServerLogic {
             public void onServerConnected(Server server) {
             }
         };
-        ServerList.getInstance().listeners.addServerStateChangeListener(serverStateChangeListener);
+        ServerList.getInstance().stateChangeDelegate.addServerStateChangeListener(serverStateChangeListener);
     }
 
     public void sendAudioSessionChanged(AudioSession changedSession) {
@@ -108,7 +108,7 @@ public class ServerLogic {
 
     private void checkIfConnectedAndRaiseEvents(){
         if (connection.isConnected()) {
-            ServerList.getInstance().listeners.serverConnected(server);
+            ServerList.getInstance().stateChangeDelegate.serverConnected(server);
             ServerList.getInstance().setActiveServer(server);
             Log.i(MainActivity.TAG, "Server " + server.name + " now connected & active");
         }

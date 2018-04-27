@@ -23,9 +23,11 @@ public class EditAudioSessionMessageHandler implements ReceivedMessageHandler {
 
     @Override
     public void handleMessage() {
+        //Deserialize received Json
         String jsonData = message.substring(messageTypeIdentifierPrefix.length());
         AudioSession editedSession = Json.deserialize(jsonData, AudioSession.class);
 
+        //Update the datamodel
         ClientAudioSessions sessions = ClientAudioSessionsManager.getClientAudioSessions(serverId);
         sessions.updateAudioSession(editedSession);
     }

@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     public NetworkDiscoveryBroadcastSender networkDiscoveryBroadcastSender = new NetworkDiscoveryBroadcastSender(this);
 
     //Placeholder for when not connected to any server
-    private NoVolumeSlidersToShowPlaceholder nothingToShowPlaceholder = new NoVolumeSlidersToShowPlaceholder(this);
+    public NoVolumeSlidersToShowPlaceholder nothingToShowPlaceholder = new NoVolumeSlidersToShowPlaceholder(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean fragmentRetained() {
-        return getSupportFragmentManager().findFragmentByTag(VolumeSlidersFragment.class.getSimpleName()) == null;
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(VolumeSlidersFragment.class.getSimpleName());
+        return fragment != null;
     }
 
     public void connect(final Server s) {
