@@ -13,7 +13,7 @@ import mikastamm.com.soundmixer.Networking.ServerConnection;
  */
 
 public class TrackEndMessageSenderRunnable implements Runnable {
-    public static String messageTag = "ENDTRACK";
+    public static String messageTag = "ENDTRACK{";
 
     private ServerConnection connection;
     private String trackedSessionId;

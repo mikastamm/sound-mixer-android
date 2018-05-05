@@ -24,7 +24,7 @@ public class MessageReceiverRunnable implements Runnable {
 
     @Override
     public void run() {
-        String msg = null;
+        String msg;
         try {
             while ((msg = connection.readLine()) != null && !stopReceiving) {
                 Log.i(MainActivity.TAG, "MessageReceiver: Received " + msg);
@@ -43,4 +43,6 @@ public class MessageReceiverRunnable implements Runnable {
             ServerList.getInstance().stateChangeDelegate.serverDisconnected(server);
         }
     }
+
+
 }

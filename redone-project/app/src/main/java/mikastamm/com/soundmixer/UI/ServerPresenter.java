@@ -5,14 +5,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.widget.Toast;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.KnownServerList;
 import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
+import mikastamm.com.soundmixer.Networking.NetworkDiscoveryServerSearcher;
 import mikastamm.com.soundmixer.R;
 import mikastamm.com.soundmixer.ServerList;
 import mikastamm.com.soundmixer.ServerListChangeDelegate;
+import mikastamm.com.soundmixer.ServerStateChangeDelegate;
+
+import static mikastamm.com.soundmixer.MainActivity.TAG;
 
 /**
  * Created by Mika on 09.04.2018.
@@ -20,26 +24,25 @@ import mikastamm.com.soundmixer.ServerListChangeDelegate;
 
 public class ServerPresenter {
     private MainActivity mainActivity;
-    private NavigationView navigationView;
     private SubMenu serverMenu;
-    private ServerListChangeDelegate.ServerListChangeListener listener;
-    NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener ndListener;
+    private ServerListChangeDelegate.ServerListChangeListener serverListChangeListener;
+    private ServerStateChangeDelegate.ServerStateChangeListener serverStateChangeListener;
+    private NetworkDiscoveryServerSearcher.NetworkDiscoveryDelegate.NetworkDiscoveryListener ndListener;
 
     public ServerPresenter(MainActivity activity, NavigationView navigationView) {
         this.mainActivity = activity;
-        this.navigationView = navigationView;
         serverMenu = navigationView.getMenu().addSubMenu(activity.getString(R.string.main_menu_servers_submenu));
         addEmptyMenuEntry();
         subscribeToListeners();
     }
 
     public void dispose() {
-        ServerList.getInstance().changeDelegate.removeServerListChangeListener(listener);
-        mainActivity.networkDiscoveryBroadcastSender.delegate.removeListener(ndListener);
+        ServerList.getInstance().listChangeDelegate.removeServerListChangeListener(serverListChangeListener);
+        mainActivity.networkDiscoveryServerSearcher.delegate.removeListener(ndListener);
     }
 
     private void subscribeToListeners() {
-        listener = new ServerListChangeDelegate.ServerListChangeListener() {
+        serverListChangeListener = new ServerListChangeDelegate.ServerListChangeListener() {
             @Override
             public void onServerDiscovered(Server server) {
                 final Server finalServer = server;
@@ -64,19 +67,40 @@ public class ServerPresenter {
             }
         };
 
-        ServerList.getInstance().changeDelegate.addServerListChangeListener(listener);
+        ServerList.getInstance().listChangeDelegate.addServerListChangeListener(serverListChangeListener);
 
-        ndListener = new NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate.NetworkDiscoveryListener() {
+        serverStateChangeListener = new ServerStateChangeDelegate.ServerStateChangeListener() {
+            @Override
+            public void onServerConnected(Server server) {
+
+            }
+
+            @Override
+            public void onServerDisconnected(Server server) {
+                Toast.makeText(mainActivity,  server.name +" disconnected", Toast.LENGTH_SHORT).show();
+                mainActivity.networkDiscoveryServerSearcher.searchForServers();
+                mainActivity.nothingToShowPlaceholder.showReplacer();
+            }
+
+            @Override
+            public void onActiveServerChanged(Server oldActive, Server newActive) {
+
+            }
+        };
+
+        ServerList.getInstance().stateChangeDelegate.addServerStateChangeListener(serverStateChangeListener);
+
+        ndListener = new NetworkDiscoveryServerSearcher.NetworkDiscoveryDelegate.NetworkDiscoveryListener() {
             @Override
             public void onNetworkDiscoveryStarted() {
-                Log.i(MainActivity.TAG, "Network Discovery Started");
+                Log.i(TAG, "Network Discovery Started");
                 clearServerMenu();
                 addEmptyMenuEntry();
             }
 
             @Override
             public void onNetworkDiscoveryFinished() {
-                Log.i(MainActivity.TAG, "Network Discovery Finished");
+                Log.i(TAG, "Network Discovery Finished");
                 boolean hasConnected = false;
 
                 for (Server s : ServerList.getInstance()) {
@@ -95,7 +119,7 @@ public class ServerPresenter {
             }
         };
 
-        mainActivity.networkDiscoveryBroadcastSender.delegate.addListener(ndListener);
+        mainActivity.networkDiscoveryServerSearcher.delegate.addListener(ndListener);
     }
 
     private boolean isConnected(){
@@ -104,7 +128,12 @@ public class ServerPresenter {
 
     //To keep the "Computers" submenu even though there are no servers
     private void addEmptyMenuEntry(){
-        serverMenu.add(Menu.NONE, 0, Menu.NONE, "");
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                serverMenu.add(Menu.NONE, 0, Menu.NONE, "");
+            }
+        });
     }
 
     private void removeEmptyMenuEntry(){
@@ -112,20 +141,25 @@ public class ServerPresenter {
     }
 
     private void clearServerMenu(){
-        serverMenu.clear();
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                serverMenu.clear();
+            }
+        });
     }
 
     private void addServerToMenu(Server server) {
         int integerServerId = server.getIntegerServerId();
         MenuItem item = serverMenu.add(Menu.NONE, integerServerId, Menu.NONE, server.name);
         item.setIcon(R.drawable.ic_server);
-        Log.i(MainActivity.TAG, "Added " + server.name + " to menu");
+        Log.i(TAG, "Added " + server.name + " to menu");
     }
 
     private void removeFromServerMenu(Server server) {
         int integerServerId = server.getIntegerServerId();
         serverMenu.removeItem(integerServerId);
-        Log.i(MainActivity.TAG, "Remove " + server.name + " from menu");
+        Log.i(TAG, "Remove " + server.name + " from menu");
     }
 
 

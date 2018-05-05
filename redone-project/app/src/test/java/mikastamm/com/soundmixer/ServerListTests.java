@@ -78,7 +78,7 @@ public class ServerListTests {
 
     @Test
     public void test_ServerListenerFires(){
-        list.changeDelegate.addServerListChangeListener(new ServerListChangeDelegate.ServerListChangeListener() {
+        list.listChangeDelegate.addServerListChangeListener(new ServerListChangeDelegate.ServerListChangeListener() {
             @Override
             public void onServerDiscovered(Server server) {
                 discovered++;

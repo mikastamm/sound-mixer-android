@@ -30,7 +30,7 @@ public class ServerList implements Iterable<Server>{
     }
 
     //Logic
-    public ServerListChangeDelegate changeDelegate = new ServerListChangeDelegate();
+    public ServerListChangeDelegate listChangeDelegate = new ServerListChangeDelegate();
     public ServerStateChangeDelegate stateChangeDelegate = new ServerStateChangeDelegate();
     private final Map<String, Server> servers = new HashMap<>();
     private Server active;
@@ -42,7 +42,7 @@ public class ServerList implements Iterable<Server>{
             synchronized (servers) {
                 servers.put(server.id, server);
             }
-            changeDelegate.serverDiscovered(server);
+            listChangeDelegate.serverDiscovered(server);
         }
         catch (InvalidServerException ex)
         {
@@ -57,7 +57,7 @@ public class ServerList implements Iterable<Server>{
             synchronized (servers) {
                 servers.remove(server.id);
             }
-            changeDelegate.serverLost(server);
+            listChangeDelegate.serverLost(server);
         }
          catch (InvalidServerException ex)
         {

@@ -17,10 +17,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import mikastamm.com.soundmixer.MainActivity;
-import mikastamm.com.soundmixer.Networking.Constants;
-import mikastamm.com.soundmixer.Networking.GetInfoFromServerRunnable;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Mika on 04.04.2018.
@@ -31,9 +27,9 @@ public class FindServersRunnable implements Runnable {
     public int searchTimeoutMs = 3000;
     private String broadcastMessage = "VC_HELLO";
     private Activity activity;
-    private NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate delegate;
+    private NetworkDiscoveryServerSearcher.NetworkDiscoveryDelegate delegate;
 
-    public FindServersRunnable(Activity activity, NetworkDiscoveryBroadcastSender.NetworkDiscoveryDelegate delegate)
+    public FindServersRunnable(Activity activity, NetworkDiscoveryServerSearcher.NetworkDiscoveryDelegate delegate)
     {
         this.activity = activity;
         this.delegate = delegate;

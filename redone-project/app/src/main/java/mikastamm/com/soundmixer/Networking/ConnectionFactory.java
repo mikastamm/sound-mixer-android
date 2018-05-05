@@ -3,47 +3,44 @@ package mikastamm.com.soundmixer.Networking;
 import java.net.Socket;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
+import mikastamm.com.soundmixer.Exceptions.InvalidConfigurationException;
 
 /**
  * Created by Mika on 03.04.2018.
  */
 
 public class ConnectionFactory {
-    private ConnectionType type;
+    private boolean useSsl = false;
 
-    public ConnectionFactory()
-    {
-        this.type = ConnectionType.Socket;
-    }
+    public ConnectionFactory(){}
 
-    public ConnectionFactory(ConnectionType type)
+    public ConnectionFactory(boolean useSsl)
     {
-        this.type = type;
+        this.useSsl = useSsl;
     }
 
     public ServerConnection makeConnection(Server server)
     {
-        if(type == ConnectionType.Socket)
-        {
+        if(!useSsl)
             return new SocketServerConnection(server);
-        }
-        return null;
+        else
+            return new SslServerConnection(server);
     }
 
     public Connection makeConnection(String ip)
     {
-        if(type == ConnectionType.Socket) {
+        if(!useSsl)
             return new SocketConnection(ip);
-        }
-        return null;
+        else
+            return new SslConnection(ip);
     }
 
     public Connection makeConnection(Socket socket)
     {
-        if(type == ConnectionType.Socket) {
-            return new SocketConnection(socket);
-        }
-        return null;
+        if(useSsl)
+            throw new InvalidConfigurationException("Cannot use ssl with a socket");
+
+        return new SocketConnection(socket);
     }
 
     public enum ConnectionType{

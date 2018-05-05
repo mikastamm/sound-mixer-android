@@ -1,5 +1,7 @@
 package mikastamm.com.soundmixer.UI;
 
+import android.widget.Toast;
+
 import mikastamm.com.soundmixer.Datamodel.Server;
 import mikastamm.com.soundmixer.MainActivity;
 import mikastamm.com.soundmixer.ServerList;
@@ -23,7 +25,8 @@ public class NoVolumeSlidersToShowPlaceholder {
         }
 
         @Override public void onServerConnected(Server server) {}
-        @Override public void onServerDisconnected(Server server) {}
+        @Override public void onServerDisconnected(Server server) {
+        }
     };
 
     public NoVolumeSlidersToShowPlaceholder(MainActivity mainActivity)

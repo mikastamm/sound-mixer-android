@@ -6,12 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import mikastamm.com.soundmixer.Datamodel.Server;
-import mikastamm.com.soundmixer.Networking.NetworkDiscoveryBroadcastSender;
+import mikastamm.com.soundmixer.Networking.NetworkDiscoveryServerSearcher;
 import mikastamm.com.soundmixer.Networking.ServerConnectionList;
+import mikastamm.com.soundmixer.Networking.ServerLifeSignalReceiver;
 import mikastamm.com.soundmixer.UI.NavigationViewSetup;
 import mikastamm.com.soundmixer.UI.NoVolumeSlidersToShowPlaceholder;
 import mikastamm.com.soundmixer.UI.ServerPresenter;
@@ -20,32 +20,40 @@ import mikastamm.com.soundmixer.UI.VolumeSlidersFragment;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "sound-mixer-log";
 
+    //Sends broadcast and receives response from all available servers in the network
+    public NetworkDiscoveryServerSearcher networkDiscoveryServerSearcher;
+
+    //Placeholder for when not connected to any server
+    public NoVolumeSlidersToShowPlaceholder nothingToShowPlaceholder;
+
     //Sets up and manages the navigation drawer (Sidebar)
     private NavigationViewSetup navigationViewSetup;
 
     //Keeps the Servers in the Sidebar up to date with the Datamodel
     private ServerPresenter serverPresenter;
 
-    //Sends broadcast and receives response from all available servers in the network
-    public NetworkDiscoveryBroadcastSender networkDiscoveryBroadcastSender = new NetworkDiscoveryBroadcastSender(this);
-
-    //Placeholder for when not connected to any server
-    public NoVolumeSlidersToShowPlaceholder nothingToShowPlaceholder = new NoVolumeSlidersToShowPlaceholder(this);
+    //Server sends a message when its comes online, this receives it
+    private ServerLifeSignalReceiver serverLifeSignalReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        networkDiscoveryServerSearcher = new NetworkDiscoveryServerSearcher(this);
         navigationViewSetup = new NavigationViewSetup(this);
         serverPresenter = new ServerPresenter(this, navigationViewSetup.navigationView);
+        nothingToShowPlaceholder = new NoVolumeSlidersToShowPlaceholder(this);
+        serverLifeSignalReceiver = new ServerLifeSignalReceiver(networkDiscoveryServerSearcher);
+        serverLifeSignalReceiver.start();
 
+        nothingToShowPlaceholder.startListening();
+        //Only show the not connected Screen when the app is first started and not on orientation change
         if (!fragmentRetained()) {
-            nothingToShowPlaceholder.startListening();
             nothingToShowPlaceholder.showReplacer();
         }
 
-        networkDiscoveryBroadcastSender.searchForServers();
+        networkDiscoveryServerSearcher.searchForServers();
     }
 
     private boolean fragmentRetained() {
@@ -94,15 +102,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        networkDiscoveryBroadcastSender.stopSearch();
+        networkDiscoveryServerSearcher.stopSearch();
+        serverLifeSignalReceiver.stop();
+        nothingToShowPlaceholder.stopListening();
+        serverPresenter.dispose();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        nothingToShowPlaceholder.stopListening();
-        serverPresenter.dispose();
 
         if (isFinishing())
             ServerConnectionList.getInstance().disconnectAndClear();

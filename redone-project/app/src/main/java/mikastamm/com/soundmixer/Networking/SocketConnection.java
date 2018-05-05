@@ -46,7 +46,7 @@ public class SocketConnection implements Connection {
 
     @Override
     public String readLine() throws IOException {
-        return inFromServer.readLine();
+            return inFromServer.readLine();
     }
 
     @Override
@@ -64,6 +64,13 @@ public class SocketConnection implements Connection {
             e.printStackTrace();
         }
     }
+
+    private Runnable connectRunnable = new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
 
     @Override
     public void dispose() {

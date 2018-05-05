@@ -35,6 +35,7 @@ public class ServerLogic {
     }
 
     public void connectAndStartCommunicating() {
+
         if(isAlreadyConnected())
             recoverConnection();
         else
@@ -89,7 +90,7 @@ public class ServerLogic {
     }
 
     private void makeNewConnection() {
-        connection = new ConnectionFactory(ConnectionFactory.ConnectionType.Socket).makeConnection(server);
+        connection = new ConnectionFactory(false).makeConnection(server);
         ServerConnectionList.getInstance().add(connection);
         //Connect on new Thread
         new Thread(new Runnable() {
@@ -98,6 +99,7 @@ public class ServerLogic {
                 connection.connect();
             }
         }).start();
+
         checkIfConnectedAndRaiseEvents();
     }
 
@@ -117,6 +119,5 @@ public class ServerLogic {
     private boolean isAlreadyConnected() {
         return ServerConnectionList.getInstance().contains(server.id);
     }
-
 
 }

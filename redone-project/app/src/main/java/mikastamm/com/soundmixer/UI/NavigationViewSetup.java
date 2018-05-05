@@ -71,7 +71,7 @@ public class NavigationViewSetup {
         //Find the clicked DrawerItem and react accordingly
         switch(menuItem.getItemId()) {
             case R.id.nav_refresh:
-                mainActivity.networkDiscoveryBroadcastSender.searchForServers();
+                mainActivity.networkDiscoveryServerSearcher.searchForServers();
                 break;
             case R.id.nav_info:
                 drawerLayout.closeDrawers();

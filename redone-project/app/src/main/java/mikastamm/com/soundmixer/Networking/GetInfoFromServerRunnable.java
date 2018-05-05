@@ -27,7 +27,7 @@ public class GetInfoFromServerRunnable implements Runnable {
     public void run() {
         connection.connect();
         String serverData = null;
-
+        sleep(1000);
         try{
             serverData = connection.readLine();
             Log.i("sound-mixer-log", serverData);
@@ -50,5 +50,14 @@ public class GetInfoFromServerRunnable implements Runnable {
         }
 
         connection.dispose();
+    }
+
+    private void sleep(int ms)
+    {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

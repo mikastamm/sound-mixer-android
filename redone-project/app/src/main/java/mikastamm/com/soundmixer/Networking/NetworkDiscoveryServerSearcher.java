@@ -9,13 +9,13 @@ import java.util.List;
  * Created by Mika on 03.04.2018.
  */
 
-public class NetworkDiscoveryBroadcastSender {
+public class NetworkDiscoveryServerSearcher {
     private Activity activity;
     private FindServersRunnable findServersRunnable;
     //The delegate stores and calls the subscribed NetworkDiscoveryListeners
     public NetworkDiscoveryDelegate delegate = new NetworkDiscoveryDelegate();
 
-    public NetworkDiscoveryBroadcastSender(Activity activity){
+    public NetworkDiscoveryServerSearcher(Activity activity){
         this.activity = activity;
     }
 
